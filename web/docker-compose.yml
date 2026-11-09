@@ -1,0 +1,27 @@
+# Sirve el sitio de reservas (soaweb.marioaponte.me) y hace de proxy a la API bajo /api.
+# Se une a la red del backend para alcanzar el contenedor 'gateway'. El túnel expone este nginx.
+#
+# Uso (desde esta carpeta /opt/Hotel-Marriot/web):
+#   docker compose up -d
+#
+name: soa-web
+
+services:
+  web:
+    image: nginx:1.27-alpine
+    container_name: soa_web
+    restart: unless-stopped
+    volumes:
+      - ./sitio:/usr/share/nginx/html:ro
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    ports:
+      - "127.0.0.1:8088:80"   # solo localhost; el túnel de Cloudflare lo expone
+    networks:
+      - backend
+
+networks:
+  backend:
+    # Red creada por el stack del backend (jw-marriott-soa).
+    # Verifica el nombre exacto con:  docker network ls | grep marriott
+    name: jw-marriott-soa_backend
+    external: true
