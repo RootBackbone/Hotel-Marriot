@@ -220,4 +220,41 @@ input.in:focus,select.in:focus{outline:2px solid var(--oro);outline-offset:1px;b
 .chat-input button{border:0;background:var(--navy);color:#fff;width:38px;height:38px;border-radius:50%;cursor:pointer;font-size:1rem}
 @media(max-width:480px){.chat-panel{right:12px;left:12px;width:auto;bottom:84px}}
 
+/* ---------- CONTADOR + VER DETALLE ---------- */
+.cnt{display:inline-flex;align-items:center;gap:6px;font-size:.74rem;letter-spacing:.1em;text-transform:uppercase;padding:5px 11px;border-radius:999px;margin-bottom:4px}
+.cnt b{font-family:var(--sans);font-size:.95rem;font-weight:700}
+.cnt.ok{background:color-mix(in srgb,var(--ok) 15%,transparent);color:var(--ok)}
+.cnt.no{background:color-mix(in srgb,var(--tinta2) 15%,transparent);color:var(--tinta2)}
+.room .ph .verdet{position:absolute;right:12px;bottom:12px;z-index:3;opacity:0;transform:translateY(4px);
+  border:0;background:rgba(255,255,255,.94);color:var(--navy);font-family:var(--sans);font-weight:500;
+  font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;padding:7px 13px;border-radius:2px;cursor:pointer;transition:all .2s}
+.room:hover .ph .verdet{opacity:1;transform:translateY(0)}
+.room .ph .verdet:hover{background:#fff;color:var(--oro)}
+@media(hover:none){.room .ph .verdet{opacity:1;transform:none}}
+
+/* ---------- MODAL DETALLE ---------- */
+.modal.det{max-width:860px;padding:0}
+.det-gal{position:relative;background:#000}
+.det-gal img{width:100%;height:420px;object-fit:cover;display:block}
+@media(max-width:560px){.det-gal img{height:280px}}
+.det-nav{position:absolute;top:50%;transform:translateY(-50%);z-index:3;width:42px;height:42px;border-radius:50%;
+  border:0;background:rgba(255,255,255,.9);color:var(--navy);font-size:1.6rem;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s}
+.det-nav:hover{background:#fff}
+.det-nav.prev{left:14px}.det-nav.next{right:14px}
+.det-dots{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);z-index:3;display:flex;gap:7px}
+.det-dots span{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.5);transition:background .2s}
+.det-dots span.on{background:#fff}
+.det-info{padding:24px 26px 26px}
+.det-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;border-bottom:1px solid var(--linea);padding-bottom:16px;margin-bottom:16px}
+.det-head h3{font-size:1.7rem}
+.det-sub{font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;color:var(--tinta2);margin-top:4px}
+.det-price{text-align:right;white-space:nowrap}
+.det-price span{display:block;font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;color:var(--tinta2)}
+.det-price b{font-family:var(--sans);font-size:1.5rem;color:var(--navy);font-weight:700;font-variant-numeric:tabular-nums}
+.det-info>p{color:var(--tinta2);margin:0 0 16px}
+.det-amen{display:grid;grid-template-columns:1fr 1fr;gap:9px 18px;margin-bottom:20px}
+@media(max-width:480px){.det-amen{grid-template-columns:1fr}}
+.det-amen span{font-size:.88rem;color:var(--tinta)}
+.det-foot{display:flex;align-items:center;justify-content:space-between;gap:14px;border-top:1px solid var(--linea);padding-top:18px;flex-wrap:wrap}
+
 @media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto}}

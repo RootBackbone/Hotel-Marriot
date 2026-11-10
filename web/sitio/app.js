@@ -93,41 +93,61 @@ async function cargarCatalogo(){
 function norm(res){
   if (res.status!=="fulfilled" || !res.value) return [];
   const v = res.value;
-  return Array.isArray(v) ? v : (v.content || v.data || v.items || []);
+  return Array.isArray(v) ? v : (v.disponibles || v.content || v.data || v.items || v.habitaciones || []);
 }
 function tipoDe(h){
-  const t = (h.tipo || h.categoria || h.nombre || "").toString().toUpperCase();
+  const t = (h.tipo || h.categoria || h.tipoHabitacion || h.nombre || "").toString().toUpperCase();
   if (t.includes("PRESIDEN")) return "PRESIDENCIAL";
   if (t.includes("SUITE"))    return "SUITE";
   if (t.includes("DOBLE")||t.includes("DOUBLE")) return "DOBLE";
   return "SIMPLE";
 }
+function precioDe(h){
+  return h.precioNoche ?? h.precio ?? h.tarifa ?? h.tarifa_noche ?? h.tarifaNoche ?? h.precio_noche ?? 0;
+}
+const ORDEN_TIPO = ["SIMPLE","DOBLE","SUITE","PRESIDENCIAL"];
+function disponible(h){ return !(h.disponible===false || /MANTEN|OCUP/i.test(h.estado||"")); }
+
+/* Agrupa las habitaciones por tipo: una tarjeta por tipo con contador de disponibilidad */
+function agruparPorTipo(){
+  const g = {};
+  S.habitaciones.forEach(h=>{
+    const t = tipoDe(h);
+    (g[t] = g[t] || { tipo:t, items:[], disp:0, precio:Infinity }).items.push(h);
+    if (disponible(h)) g[t].disp++;
+    const p = precioDe(h); if (p>0) g[t].precio = Math.min(g[t].precio, p);
+  });
+  return ORDEN_TIPO.filter(t=>g[t]).map(t=>g[t]);
+}
+
 function pintarRooms(){
   const cont = $("#roomsGrid");
   if (!S.habitaciones.length){
     cont.innerHTML = `<div class="skeleton">No hay habitaciones disponibles por ahora.</div>`;
     return;
   }
-  cont.innerHTML = S.habitaciones.map(h=>{
-    const tipo = tipoDe(h);
-    const precio = h.precioNoche ?? h.precio ?? h.tarifa ?? h.precio_noche ?? 0;
-    const cod  = h.codigo || h.id || h.habitacionId || "";
-    const piso = h.piso!=null ? `Piso ${h.piso}` : "";
-    const estado = (h.estado||h.disponible===false?"":"DISPONIBLE");
-    const dispo = (h.disponible===false || /MANTEN|OCUP/i.test(h.estado||"")) ;
+  const grupos = agruparPorTipo();
+  cont.innerHTML = grupos.map(g=>{
+    const t = g.tipo;
+    const hay = g.disp>0;
+    const precio = isFinite(g.precio)?g.precio:0;
+    const cont2 = hay
+      ? `<span class="cnt ok"><b>${g.disp}</b> disponible${g.disp>1?"s":""}</span>`
+      : `<span class="cnt no">Sin disponibilidad</span>`;
     return `<article class="room">
-      <div class="ph" style="background-image:url('${FOTO[tipo]}')">
-        <span class="tag ${dispo?"mant":""}">${dispo?"No disponible":tipo}</span>
+      <div class="ph" style="background-image:url('${FOTO[t]}')">
+        <span class="tag">${t}</span>
+        <button class="verdet" onclick="verDetalle('${t}')">Ver detalle</button>
       </div>
       <div class="body">
-        <h3>${h.nombre || nombreTipo(tipo)}</h3>
-        <div class="meta">${[piso,cod].filter(Boolean).join(" · ")||tipo}</div>
-        <p style="color:var(--tinta2);font-size:.9rem;margin:0 0 6px">${descTipo(tipo)}</p>
+        <h3>${nombreTipo(t)}</h3>
+        <div class="meta">${g.items.length} habitacion${g.items.length>1?"es":""} · ${t}</div>
+        <p style="color:var(--tinta2);font-size:.9rem;margin:0 0 10px">${descTipo(t)}</p>
+        ${cont2}
         <div class="foot">
-          <div class="price"><b>${soles(precio)}</b> <span>/ noche</span></div>
-          <button class="btn sm ${dispo?"":"oro"}" ${dispo?"disabled":""}
-            onclick='abrirReserva(${JSON.stringify(JSON.stringify(h))})'>
-            ${dispo?"Ocupada":"Reservar"}</button>
+          <div class="price"><span>Desde</span> <b>${soles(precio)}</b> <span>/ noche</span></div>
+          <button class="btn sm ${hay?"oro":""}" ${hay?"":"disabled"}
+            onclick="reservarTipo('${t}')">${hay?"Reservar":"Agotado"}</button>
         </div>
       </div>
     </article>`;
@@ -140,6 +160,66 @@ function descTipo(t){return{
   SUITE:"Sala independiente, terraza y vista al malecón de Miraflores.",
   PRESIDENCIAL:"La mejor vista al Pacífico, jacuzzi y atención de mayordomo."
 }[t];}
+/* amenities por tipo para el detalle */
+function amenitiesTipo(t){return{
+  SIMPLE:["Cama king","Wi-Fi de alta velocidad","Escritorio ejecutivo","Smart TV 50\"","Minibar","Caja fuerte"],
+  DOBLE:["Dos camas queen","Vista parcial al mar","Wi-Fi de alta velocidad","Smart TV 55\"","Minibar","Cafetera"],
+  SUITE:["Sala independiente","Terraza con vista al malecón","Cama king","Bañera y ducha","Smart TV 65\"","Executive Lounge"],
+  PRESIDENCIAL:["Vista total al Pacífico","Jacuzzi privado","Mayordomo 24 h","Comedor para 8","Dos ambientes","Executive Lounge"]
+}[t];}
+
+/* ---- fotos de detalle por tipo (galería) ---- */
+const FOTO_DET = {
+  SIMPLE:["img/det-simple-1.jpg","img/det-simple-2.jpg","img/det-simple-3.jpg"],
+  DOBLE:["img/det-doble-1.jpg","img/det-doble-2.jpg","img/det-doble-3.jpg"],
+  SUITE:["img/det-suite-1.jpg","img/det-suite-2.jpg","img/det-suite-3.jpg"],
+  PRESIDENCIAL:["img/det-presidencial-1.jpg","img/det-presidencial-2.jpg","img/det-presidencial-3.jpg"]
+};
+let DET_IDX = 0, DET_TIPO = null;
+function primeraDisponible(t){
+  return S.habitaciones.find(h=>tipoDe(h)===t && disponible(h))
+      || S.habitaciones.find(h=>tipoDe(h)===t);
+}
+function reservarTipo(t){
+  const h = primeraDisponible(t);
+  if (h) abrirReserva(JSON.stringify(h));
+}
+function verDetalle(t){
+  DET_TIPO=t; DET_IDX=0;
+  const g = agruparPorTipo().find(x=>x.tipo===t) || {items:[],disp:0,precio:0};
+  const fotos = FOTO_DET[t]||[FOTO[t]];
+  const precio = isFinite(g.precio)&&g.precio?g.precio:precioDe(primeraDisponible(t)||{});
+  $("#detBody").innerHTML = `
+    <div class="det-gal">
+      <img id="detImg" src="${fotos[0]}" alt="${nombreTipo(t)}">
+      ${fotos.length>1?`
+        <button class="det-nav prev" onclick="detPaso(-1)" aria-label="Anterior">‹</button>
+        <button class="det-nav next" onclick="detPaso(1)" aria-label="Siguiente">›</button>
+        <div class="det-dots" id="detDots">${fotos.map((_,i)=>`<span class="${i===0?"on":""}"></span>`).join("")}</div>`:""}
+    </div>
+    <div class="det-info">
+      <div class="det-head">
+        <div><h3>${nombreTipo(t)}</h3><div class="det-sub">${t} · ${g.items.length} en el hotel</div></div>
+        <div class="det-price"><span>Desde</span><b>${soles(precio)}</b><span>/ noche</span></div>
+      </div>
+      <p>${descTipo(t)}</p>
+      <div class="det-amen">${amenitiesTipo(t).map(a=>`<span>✓ ${a}</span>`).join("")}</div>
+      <div class="det-foot">
+        <span class="cnt ${g.disp>0?"ok":"no"}">${g.disp>0?`<b>${g.disp}</b> disponible${g.disp>1?"s":""} ahora`:"Sin disponibilidad"}</span>
+        <button class="btn oro" ${g.disp>0?"":"disabled"} onclick="cerrarDetalle();reservarTipo('${t}')">${g.disp>0?"Reservar esta habitación":"Agotado"}</button>
+      </div>
+    </div>`;
+  $("#detTitle").textContent = nombreTipo(t);
+  $("#detalle").hidden=false; document.body.style.overflow="hidden";
+}
+function detPaso(d){
+  const fotos = FOTO_DET[DET_TIPO]||[];
+  if(!fotos.length) return;
+  DET_IDX = (DET_IDX + d + fotos.length) % fotos.length;
+  $("#detImg").src = fotos[DET_IDX];
+  $$("#detDots span").forEach((s,i)=>s.classList.toggle("on", i===DET_IDX));
+}
+function cerrarDetalle(){ $("#detalle").hidden=true; document.body.style.overflow=""; }
 
 /* ===========================================================
    RESERVA (modal de 3 pasos) — conserva el flujo real contra la API
@@ -169,7 +249,7 @@ function render(){
 
 function paso1HTML(){
   const h=HAB_ACTUAL, tipo=tipoDe(h);
-  const precio=h.precioNoche ?? h.precio ?? h.tarifa ?? 0;
+  const precio=precioDe(h);
   return `
    <div style="display:flex;gap:16px;align-items:center;margin-bottom:8px">
      <img src="${FOTO[tipo]}" style="width:92px;height:72px;object-fit:cover;border:1px solid var(--linea)" alt="">
@@ -237,7 +317,7 @@ function togTour(j,on){
 }
 
 function calcular(){
-  const h=S.sel.hab, pr=h.precioNoche ?? h.precio ?? h.tarifa ?? 0;
+  const h=S.sel.hab, pr=precioDe(h);
   const n=noches(S.sel.checkin,S.sel.checkout);
   const alo=pr*n;
   const pak=S.sel.paquete?(S.sel.paquete.precio??S.sel.paquete.costo??0):0;
@@ -451,8 +531,12 @@ window.addEventListener("DOMContentLoaded", ()=>{
   $("#chatClose")?.addEventListener("click",()=>toggleChat(false));
   $("#chatForm")?.addEventListener("submit",enviarChat);
   // cerrar modales con Escape / click fuera
-  document.addEventListener("keydown",e=>{ if(e.key==="Escape"){cerrarReserva();cerrarFoto();} });
+  document.addEventListener("keydown",e=>{
+    if(e.key==="Escape"){cerrarReserva();cerrarFoto();cerrarDetalle();}
+    if(!$("#detalle").hidden){ if(e.key==="ArrowRight")detPaso(1); if(e.key==="ArrowLeft")detPaso(-1); }
+  });
   $("#overlay")?.addEventListener("click",e=>{ if(e.target.id==="overlay") cerrarReserva(); });
+  $("#detalle")?.addEventListener("click",e=>{ if(e.target.id==="detalle") cerrarDetalle(); });
   // catálogo en vivo
   cargarCatalogo();
   // ancla inicial
@@ -461,4 +545,5 @@ window.addEventListener("DOMContentLoaded", ()=>{
 
 /* exponer funciones usadas en onclick inline */
 Object.assign(window,{ irA, abrirReserva, cerrarReserva, irPaso2, selPaquete, togTour,
-  confirmar, abrirFoto, cerrarFoto, toggleChat, enviarChat });
+  confirmar, abrirFoto, cerrarFoto, toggleChat, enviarChat,
+  verDetalle, cerrarDetalle, detPaso, reservarTipo });
