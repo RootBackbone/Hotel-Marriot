@@ -84,8 +84,11 @@ async function cargarCatalogo(){
     S.habitaciones = norm(habs);
     S.paquetes     = norm(paks);
     S.tours        = norm(trs);
+    console.log("[catalogo] habitaciones:", S.habitaciones.length, S.habitaciones,
+                "| paquetes:", S.paquetes.length, "| tours:", S.tours.length);
     pintarRooms();
   }catch(e){
+    console.error("[catalogo] error:", e);
     cont.innerHTML = `<div class="skeleton">No se pudo cargar el catálogo en vivo.
       Verifica la conexión con la API. (${e.status||"red"})</div>`;
   }
