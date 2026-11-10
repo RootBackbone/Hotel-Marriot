@@ -132,7 +132,7 @@ function pintarRooms(){
     const hay = g.disp>0;
     const precio = isFinite(g.precio)?g.precio:0;
     const cont2 = hay
-      ? `<span class="cnt ok"><b>${g.disp}</b> disponible${g.disp>1?"s":""}</span>`
+      ? `<span class="cnt ok">Disponible</span>`
       : `<span class="cnt no">Sin disponibilidad</span>`;
     return `<article class="room">
       <div class="ph" style="background-image:url('${FOTO[t]}')">
@@ -205,7 +205,7 @@ function verDetalle(t){
       <p>${descTipo(t)}</p>
       <div class="det-amen">${amenitiesTipo(t).map(a=>`<span>✓ ${a}</span>`).join("")}</div>
       <div class="det-foot">
-        <span class="cnt ${g.disp>0?"ok":"no"}">${g.disp>0?`<b>${g.disp}</b> disponible${g.disp>1?"s":""} ahora`:"Sin disponibilidad"}</span>
+        <span class="cnt ${g.disp>0?"ok":"no"}">${g.disp>0?"Disponible":"Sin disponibilidad"}</span>
         <button class="btn oro" ${g.disp>0?"":"disabled"} onclick="cerrarDetalle();reservarTipo('${t}')">${g.disp>0?"Reservar esta habitación":"Agotado"}</button>
       </div>
     </div>`;

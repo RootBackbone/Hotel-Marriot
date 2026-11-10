@@ -221,10 +221,11 @@ input.in:focus,select.in:focus{outline:2px solid var(--oro);outline-offset:1px;b
 @media(max-width:480px){.chat-panel{right:12px;left:12px;width:auto;bottom:84px}}
 
 /* ---------- CONTADOR + VER DETALLE ---------- */
-.cnt{display:inline-flex;align-items:center;gap:6px;font-size:.74rem;letter-spacing:.1em;text-transform:uppercase;padding:5px 11px;border-radius:999px;margin-bottom:4px}
-.cnt b{font-family:var(--sans);font-size:.95rem;font-weight:700}
-.cnt.ok{background:color-mix(in srgb,var(--ok) 15%,transparent);color:var(--ok)}
-.cnt.no{background:color-mix(in srgb,var(--tinta2) 15%,transparent);color:var(--tinta2)}
+.cnt{display:inline-flex;align-items:center;gap:8px;font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;font-weight:500;margin-bottom:4px;color:var(--tinta2)}
+.cnt::before{content:"";width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.cnt.ok::before{background:var(--ok)}
+.cnt.no::before{background:var(--tinta2)}
+.cnt.no{opacity:.75}
 .room .ph .verdet{position:absolute;right:12px;bottom:12px;z-index:3;opacity:0;transform:translateY(4px);
   border:0;background:rgba(255,255,255,.94);color:var(--navy);font-family:var(--sans);font-weight:500;
   font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;padding:7px 13px;border-radius:2px;cursor:pointer;transition:all .2s}
