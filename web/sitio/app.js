@@ -84,11 +84,8 @@ async function cargarCatalogo(){
     S.habitaciones = norm(habs);
     S.paquetes     = norm(paks);
     S.tours        = norm(trs);
-    console.log("[catalogo] habitaciones:", S.habitaciones.length, S.habitaciones,
-                "| paquetes:", S.paquetes.length, "| tours:", S.tours.length);
     pintarRooms();
   }catch(e){
-    console.error("[catalogo] error:", e);
     cont.innerHTML = `<div class="skeleton">No se pudo cargar el catálogo en vivo.
       Verifica la conexión con la API. (${e.status||"red"})</div>`;
   }
@@ -514,7 +511,7 @@ async function preciosResumen(){
 /* ===========================================================
    ARRANQUE
    =========================================================== */
-window.addEventListener("DOMContentLoaded", ()=>{
+function init(){
   // navegación
   $$("[data-go]").forEach(a=>a.addEventListener("click",ev=>{ev.preventDefault();irA(a.dataset.go);}));
   $("#burger")?.addEventListener("click",()=>$("#mobileMenu").classList.toggle("open"));
@@ -544,7 +541,13 @@ window.addEventListener("DOMContentLoaded", ()=>{
   cargarCatalogo();
   // ancla inicial
   if(location.hash) setTimeout(()=>irA(location.hash.slice(1),false),300);
-});
+}
+/* Arranca ya si el DOM está listo; si no, espera el evento. */
+if(document.readyState==="loading"){
+  document.addEventListener("DOMContentLoaded", init);
+}else{
+  init();
+}
 
 /* exponer funciones usadas en onclick inline */
 Object.assign(window,{ irA, abrirReserva, cerrarReserva, irPaso2, selPaquete, togTour,
