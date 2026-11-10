@@ -3,41 +3,44 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,500&family=Jost:wght@300;400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Marcellus&family=Playfair+Display:ital@1&family=Jost:wght@300;400;500;600&display=swap">
 <style>
-  /* Sitio de reservas JW Marriott — estética cálida y clásica. Flujo: inicio → buscar → reservar → confirmar */
+  /* Sitio de reservas JW Marriott — estética sofisticada. Flujo: inicio → buscar → reservar → confirmar */
+  /* Tipografía (estilo Principote): Marcellus (serif romana, títulos) + Jost (sans, cuerpo/UI con tracking amplio en mayúsculas). */
   :root{
-    --crema:#f6f1e7; --crema2:#efe7d8; --tinta:#2a241d; --tinta2:#5c5245;
-    --vino:#7d2235; --vino2:#9d2d44; --oro:#b08436; --oro-claro:#c9a35a;
-    --linea:#e0d5c0; --papel:#fffdf8; --ok:#2e7d46; --err:#b3271e;
-    --serif:"Cormorant Garamond",Georgia,serif;
+    --crema:#f3f4f2; --crema2:#e8ebe9; --tinta:#1b2430; --tinta2:#4a5564;
+    --vino:#1f3a5f; --vino2:#2c4d7a; --oro:#b08436; --oro-claro:#c9a35a;
+    --linea:#d6dcdd; --papel:#ffffff; --ok:#2e7d46; --err:#b3271e;
+    --serif:"Marcellus",Georgia,serif;
+    --serif-it:"Playfair Display",Georgia,serif;
     --sans:"Jost","Segoe UI",system-ui,sans-serif;
   }
   @media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
-    --crema:#201b15; --crema2:#2a231b; --tinta:#f1e9da; --tinta2:#b6a88f;
-    --vino:#c9607a; --vino2:#d6768d; --oro:#cda55f; --oro-claro:#d9b878;
-    --linea:#3a3024; --papel:#17130d; --ok:#5bbd7c; --err:#e5737d; color-scheme:dark;
+    --crema:#10161f; --crema2:#182230; --tinta:#e8ecf2; --tinta2:#98a6ba;
+    --vino:#6f9fd8; --vino2:#86b2e4; --oro:#cda55f; --oro-claro:#d9b878;
+    --linea:#26354a; --papel:#131c28; --ok:#5bbd7c; --err:#e5737d; color-scheme:dark;
   }}
   :root[data-theme="dark"]{
-    --crema:#201b15; --crema2:#2a231b; --tinta:#f1e9da; --tinta2:#b6a88f;
-    --vino:#c9607a; --vino2:#d6768d; --oro:#cda55f; --oro-claro:#d9b878;
-    --linea:#3a3024; --papel:#17130d; --ok:#5bbd7c; --err:#e5737d; color-scheme:dark;
+    --crema:#10161f; --crema2:#182230; --tinta:#e8ecf2; --tinta2:#98a6ba;
+    --vino:#6f9fd8; --vino2:#86b2e4; --oro:#cda55f; --oro-claro:#d9b878;
+    --linea:#26354a; --papel:#131c28; --ok:#5bbd7c; --err:#e5737d; color-scheme:dark;
   }
   *{box-sizing:border-box}
   [hidden]{display:none!important}
-  body{background:var(--crema);color:var(--tinta);font-family:var(--sans);font-weight:300;line-height:1.6;-webkit-font-smoothing:antialiased}
-  h1,h2,h3,h4{font-family:var(--serif);font-weight:600;text-wrap:balance;margin:0;line-height:1.12}
+  body{background:var(--crema);color:var(--tinta);font-family:var(--sans);font-weight:400;line-height:1.6;-webkit-font-smoothing:antialiased}
+  h1,h2,h3,h4{font-family:var(--serif);font-weight:400;text-wrap:balance;margin:0;line-height:1.14}
+  .hero h1 em,.sec-head em{font-family:var(--serif-it);font-style:italic}
   .wrap{max-width:1180px;margin:0 auto;padding-left:max(22px,env(safe-area-inset-left,0px));padding-right:max(22px,env(safe-area-inset-right,0px))}
 
   nav{position:sticky;top:env(safe-area-inset-top,0);z-index:30;background:color-mix(in srgb,var(--crema) 93%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--linea)}
   body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:31;background:var(--crema)}
   .nav-in{display:flex;align-items:center;gap:26px;padding-block:16px}
-  .logo{font-family:var(--serif);font-weight:700;font-size:1.45rem;letter-spacing:.4px;margin-right:auto;color:var(--tinta);cursor:pointer;background:none;border:0;text-align:left}
+  .logo{font-family:var(--serif);font-weight:400;font-size:1.5rem;letter-spacing:.06em;margin-right:auto;color:var(--tinta);cursor:pointer;background:none;border:0;text-align:left}
   .logo .sm{display:block;font-family:var(--sans);font-size:.58rem;font-weight:500;letter-spacing:.4em;text-transform:uppercase;color:var(--oro);margin-top:-2px}
   .nav-right{display:flex;align-items:center;gap:16px}
   .who{font-size:.82rem;color:var(--tinta2)}
   .who b{color:var(--vino);font-weight:500}
-  .btn{font-family:var(--sans);font-weight:500;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;
+  .btn{font-family:var(--sans);font-weight:400;font-size:.74rem;letter-spacing:.24em;text-transform:uppercase;cursor:pointer;
     border:1px solid var(--vino);background:var(--vino);color:#fff;padding:10px 20px;border-radius:2px;transition:all .2s;text-decoration:none;display:inline-block;white-space:nowrap}
   .btn:hover{background:var(--vino2);border-color:var(--vino2)}
   .btn:disabled{opacity:.5;cursor:not-allowed}
@@ -48,7 +51,7 @@
   .btn.sm{padding:7px 14px;font-size:.72rem}
   .btn:focus-visible{outline:2px solid var(--oro);outline-offset:2px}
 
-  .eyebrow{font-size:.7rem;letter-spacing:.26em;text-transform:uppercase;color:var(--oro);font-weight:600}
+  .eyebrow{font-size:.68rem;letter-spacing:.38em;text-transform:uppercase;color:var(--oro);font-weight:400}
   .eyebrow.c::before{content:"";display:inline-block;width:34px;height:1px;background:var(--oro);vertical-align:middle;margin-right:12px}
 
   /* ---------- HERO (vista inicio) ---------- */
@@ -57,12 +60,13 @@
   @media(max-width:860px){.hero-in{grid-template-columns:1fr}}
   .hero-txt{padding:60px 46px 60px 0;align-self:center}
   @media(max-width:860px){.hero-txt{padding:44px 0 36px}}
-  .hero h1{font-size:clamp(2.6rem,5.5vw,4rem);color:var(--tinta);margin-top:18px}
+  .hero h1{font-size:clamp(2.8rem,5.8vw,4.3rem);color:var(--tinta);margin-top:18px;letter-spacing:.005em}
   .hero h1 em{font-style:italic;color:var(--vino)}
   .hero p{font-size:1.05rem;color:var(--tinta2);margin:20px 0 30px;max-width:44ch}
-  .hero-img{position:relative;background:
-    linear-gradient(135deg,rgba(125,34,53,.08),rgba(176,132,54,.14)),
-    repeating-linear-gradient(45deg,var(--crema) 0,var(--crema) 18px,var(--crema2) 18px,var(--crema2) 36px);border-left:1px solid var(--linea)}
+  .hero-img{position:relative;border-left:1px solid var(--linea);
+    background:linear-gradient(120deg,rgba(42,36,29,.15),rgba(42,36,29,.4)),
+    url('img/hero.jpg');
+    background-size:cover;background-position:center}
   @media(max-width:860px){.hero-img{min-height:200px;border-left:0;border-top:1px solid var(--linea)}}
   .hero-img .badge{position:absolute;bottom:30px;left:30px;right:30px;background:var(--papel);border:1px solid var(--linea);padding:20px 24px;box-shadow:0 18px 44px rgba(42,36,29,.14)}
   .hero-img .stars{color:var(--oro);letter-spacing:4px}
@@ -93,17 +97,16 @@
   @media(max-width:560px){.rooms{grid-template-columns:1fr}}
   .room{background:var(--papel);border:1px solid var(--linea);overflow:hidden;display:flex;flex-direction:column;transition:transform .22s,box-shadow .22s}
   .room:hover{transform:translateY(-3px);box-shadow:0 20px 44px rgba(42,36,29,.13)}
-  .room .ph{height:170px;position:relative;background:
-    linear-gradient(160deg,rgba(176,132,54,.16),rgba(125,34,53,.1)),
-    repeating-linear-gradient(135deg,var(--crema) 0,var(--crema) 14px,var(--crema2) 14px,var(--crema2) 28px)}
-  .room .tag{position:absolute;top:14px;left:14px;background:var(--papel);color:var(--vino);font-size:.64rem;letter-spacing:.1em;text-transform:uppercase;font-weight:600;padding:4px 11px;border:1px solid var(--linea)}
+  .room .ph{height:190px;position:relative;background-color:var(--crema2);background-size:cover;background-position:center;overflow:hidden}
+  .room .ph::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 55%,rgba(42,36,29,.28))}
+  .room .tag{position:absolute;top:14px;left:14px;z-index:2;background:var(--papel);color:var(--vino);font-size:.64rem;letter-spacing:.1em;text-transform:uppercase;font-weight:700;padding:4px 11px;border:1px solid var(--linea)}
   .room .tag.mant{color:var(--tinta2)}
   .room .body{padding:22px;display:flex;flex-direction:column;flex:1}
   .room h3{font-size:1.5rem}
-  .room .meta{font-size:.82rem;color:var(--tinta2);margin:4px 0 16px}
+  .room .meta{font-size:.68rem;color:var(--tinta2);margin:4px 0 16px;letter-spacing:.16em;text-transform:uppercase}
   .room .foot{display:flex;align-items:baseline;justify-content:space-between;border-top:1px solid var(--linea);padding-top:14px;margin-top:auto}
-  .room .price b{font-family:var(--serif);font-size:1.6rem;color:var(--vino);font-weight:600}
-  .room .price span{font-size:.76rem;color:var(--tinta2)}
+  .room .price b{font-family:var(--sans);font-size:1.4rem;color:var(--vino);font-weight:700;letter-spacing:-.01em}
+  .room .price span{font-size:.74rem;color:var(--tinta2)}
 
   /* experiencias */
   .exp{background:var(--vino);color:#fbeee2}
@@ -136,7 +139,7 @@
   .resumen{background:var(--papel);border:1px solid var(--linea);padding:18px 20px;margin-top:4px}
   .resumen .li{display:flex;justify-content:space-between;padding:7px 0;font-size:.92rem;border-bottom:1px solid var(--linea)}
   .resumen .li:last-child{border-bottom:0}
-  .resumen .li.tot{border-top:2px solid var(--oro);margin-top:6px;padding-top:12px;font-family:var(--serif);font-size:1.3rem;font-weight:600}
+  .resumen .li.tot{border-top:2px solid var(--oro);margin-top:6px;padding-top:12px;font-size:1.15rem;font-weight:700;font-variant-numeric:tabular-nums}
   .resumen .li.tot b{color:var(--vino)}
   .addons{display:flex;flex-direction:column;gap:10px;margin-top:6px}
   .addon{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--linea);background:var(--papel);cursor:pointer}
@@ -144,7 +147,7 @@
   .addon .info{flex:1}
   .addon .info b{font-family:var(--serif);font-size:1.1rem;font-weight:600;display:block}
   .addon .info span{font-size:.8rem;color:var(--tinta2)}
-  .addon .pr{font-family:var(--serif);font-size:1.15rem;color:var(--vino);font-weight:600}
+  .addon .pr{font-size:1.05rem;color:var(--vino);font-weight:700;font-variant-numeric:tabular-nums}
   .msg{padding:11px 14px;border-radius:3px;font-size:.88rem;margin-top:14px}
   .msg.err{background:color-mix(in srgb,var(--err) 14%,transparent);color:var(--err);border-left:3px solid var(--err)}
   .msg.ok{background:color-mix(in srgb,var(--ok) 14%,transparent);color:var(--ok);border-left:3px solid var(--ok)}
@@ -270,6 +273,13 @@ async function cargarCatalogo(){
   }
 }
 
+// Fotos por tipo de habitación — Unsplash (libres de derechos, licencia gratuita).
+const FOTO={
+  SIMPLE:"img/simple.jpg",
+  DOBLE:"img/doble.jpg",
+  SUITE:"img/suite.jpg",
+  PRESIDENCIAL:"img/presidencial.jpg"
+};
 function pintarRooms(lista){
   if(!lista.length){ $("#rooms").innerHTML='<div class="skeleton">Sin habitaciones para esas fechas. Prueba otro rango.</div>'; return; }
   const nombre={SIMPLE:"Habitación Simple",DOBLE:"Habitación Doble",SUITE:"Suite Ejecutiva",PRESIDENCIAL:"Suite Presidencial"};
@@ -277,7 +287,8 @@ function pintarRooms(lista){
     const dispon = h.estado==="DISPONIBLE";
     const tag = h.estado==="MANTENIMIENTO" ? '<span class="tag mant">En mantenimiento</span>'
       : (h.tipo==="PRESIDENCIAL"?'<span class="tag">Exclusiva</span>':(h.tipo==="SUITE"?'<span class="tag">Favorita</span>':''));
-    return `<div class="room"><div class="ph">${tag}</div><div class="body">
+    const foto = FOTO[h.tipo] || FOTO.SIMPLE;
+    return `<div class="room"><div class="ph" style="background-image:url('${foto}')">${tag}</div><div class="body">
       <h3>${nombre[h.tipo]||h.tipo}</h3>
       <div class="meta">Piso ${h.piso} · ${h.id}</div>
       <div class="foot"><div class="price"><b>${money(h.tarifa_noche)}</b> <span>/ noche</span></div>
