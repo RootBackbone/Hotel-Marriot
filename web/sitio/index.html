@@ -1,483 +1,219 @@
+<!doctype html>
+<html lang="es">
+<head>
 <meta charset="utf-8">
-<title>JW Marriott Hotel Lima</title>
-<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>JW Marriott Hotel Lima — Reservas</title>
+<meta name="description" content="Hotel 5 estrellas frente al Pacífico en Miraflores, Lima. Habitaciones, restobar, spa, piscina y experiencias. Reserva en línea.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Marcellus&family=Playfair+Display:ital@1&family=Jost:wght@300;400;500;600&display=swap">
-<style>
-  /* Sitio de reservas JW Marriott — estética sofisticada. Flujo: inicio → buscar → reservar → confirmar */
-  /* Tipografía (estilo Principote): Marcellus (serif romana, títulos) + Jost (sans, cuerpo/UI con tracking amplio en mayúsculas). */
-  :root{
-    --crema:#f3f4f2; --crema2:#e8ebe9; --tinta:#1b2430; --tinta2:#4a5564;
-    --vino:#1f3a5f; --vino2:#2c4d7a; --oro:#b08436; --oro-claro:#c9a35a;
-    --linea:#d6dcdd; --papel:#ffffff; --ok:#2e7d46; --err:#b3271e;
-    --serif:"Marcellus",Georgia,serif;
-    --serif-it:"Playfair Display",Georgia,serif;
-    --sans:"Jost","Segoe UI",system-ui,sans-serif;
-  }
-  @media (prefers-color-scheme:dark){ :root:not([data-theme="light"]){
-    --crema:#10161f; --crema2:#182230; --tinta:#e8ecf2; --tinta2:#98a6ba;
-    --vino:#6f9fd8; --vino2:#86b2e4; --oro:#cda55f; --oro-claro:#d9b878;
-    --linea:#26354a; --papel:#131c28; --ok:#5bbd7c; --err:#e5737d; color-scheme:dark;
-  }}
-  :root[data-theme="dark"]{
-    --crema:#10161f; --crema2:#182230; --tinta:#e8ecf2; --tinta2:#98a6ba;
-    --vino:#6f9fd8; --vino2:#86b2e4; --oro:#cda55f; --oro-claro:#d9b878;
-    --linea:#26354a; --papel:#131c28; --ok:#5bbd7c; --err:#e5737d; color-scheme:dark;
-  }
-  *{box-sizing:border-box}
-  [hidden]{display:none!important}
-  body{background:var(--crema);color:var(--tinta);font-family:var(--sans);font-weight:400;line-height:1.6;-webkit-font-smoothing:antialiased}
-  h1,h2,h3,h4{font-family:var(--serif);font-weight:400;text-wrap:balance;margin:0;line-height:1.14}
-  .hero h1 em,.sec-head em{font-family:var(--serif-it);font-style:italic}
-  .wrap{max-width:1180px;margin:0 auto;padding-left:max(22px,env(safe-area-inset-left,0px));padding-right:max(22px,env(safe-area-inset-right,0px))}
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
 
-  nav{position:sticky;top:env(safe-area-inset-top,0);z-index:30;background:color-mix(in srgb,var(--crema) 93%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--linea)}
-  body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:31;background:var(--crema)}
-  .nav-in{display:flex;align-items:center;gap:26px;padding-block:16px}
-  .logo{font-family:var(--serif);font-weight:400;font-size:1.5rem;letter-spacing:.06em;margin-right:auto;color:var(--tinta);cursor:pointer;background:none;border:0;text-align:left}
-  .logo .sm{display:block;font-family:var(--sans);font-size:.58rem;font-weight:500;letter-spacing:.4em;text-transform:uppercase;color:var(--oro);margin-top:-2px}
-  .nav-right{display:flex;align-items:center;gap:16px}
-  .who{font-size:.82rem;color:var(--tinta2)}
-  .who b{color:var(--vino);font-weight:500}
-  .btn{font-family:var(--sans);font-weight:400;font-size:.74rem;letter-spacing:.24em;text-transform:uppercase;cursor:pointer;
-    border:1px solid var(--vino);background:var(--vino);color:#fff;padding:10px 20px;border-radius:2px;transition:all .2s;text-decoration:none;display:inline-block;white-space:nowrap}
-  .btn:hover{background:var(--vino2);border-color:var(--vino2)}
-  .btn:disabled{opacity:.5;cursor:not-allowed}
-  .btn.line{background:transparent;color:var(--vino)}
-  .btn.line:hover{background:var(--vino);color:#fff}
-  .btn.oro{background:var(--oro);border-color:var(--oro)}
-  .btn.oro:hover{background:var(--oro-claro);border-color:var(--oro-claro)}
-  .btn.sm{padding:7px 14px;font-size:.72rem}
-  .btn:focus-visible{outline:2px solid var(--oro);outline-offset:2px}
-
-  .eyebrow{font-size:.68rem;letter-spacing:.38em;text-transform:uppercase;color:var(--oro);font-weight:400}
-  .eyebrow.c::before{content:"";display:inline-block;width:34px;height:1px;background:var(--oro);vertical-align:middle;margin-right:12px}
-
-  /* ---------- HERO (vista inicio) ---------- */
-  .hero{background:var(--crema2);overflow:hidden}
-  .hero-in{display:grid;grid-template-columns:1.05fr .95fr;min-height:480px}
-  @media(max-width:860px){.hero-in{grid-template-columns:1fr}}
-  .hero-txt{padding:60px 46px 60px 0;align-self:center}
-  @media(max-width:860px){.hero-txt{padding:44px 0 36px}}
-  .hero h1{font-size:clamp(2.8rem,5.8vw,4.3rem);color:var(--tinta);margin-top:18px;letter-spacing:.005em}
-  .hero h1 em{font-style:italic;color:var(--vino)}
-  .hero p{font-size:1.05rem;color:var(--tinta2);margin:20px 0 30px;max-width:44ch}
-  .hero-img{position:relative;border-left:1px solid var(--linea);
-    background:linear-gradient(120deg,rgba(42,36,29,.15),rgba(42,36,29,.4)),
-    url('img/hero.jpg');
-    background-size:cover;background-position:center}
-  @media(max-width:860px){.hero-img{min-height:200px;border-left:0;border-top:1px solid var(--linea)}}
-  .hero-img .badge{position:absolute;bottom:30px;left:30px;right:30px;background:var(--papel);border:1px solid var(--linea);padding:20px 24px;box-shadow:0 18px 44px rgba(42,36,29,.14)}
-  .hero-img .stars{color:var(--oro);letter-spacing:4px}
-  .hero-img h3{font-size:1.3rem;margin:4px 0 2px}
-  .hero-img span{font-size:.8rem;color:var(--tinta2)}
-
-  /* buscador */
-  .search{background:var(--papel);border:1px solid var(--linea);margin-top:-30px;position:relative;z-index:5;
-    box-shadow:0 22px 56px rgba(42,36,29,.12);display:grid;grid-template-columns:1fr 1fr 1fr auto}
-  @media(max-width:720px){.search{grid-template-columns:1fr 1fr}}
-  @media(max-width:460px){.search{grid-template-columns:1fr}}
-  .search .f{padding:16px 20px;border-right:1px solid var(--linea)}
-  .search .f label{display:block;font-size:.62rem;letter-spacing:.16em;text-transform:uppercase;color:var(--oro);font-weight:600;margin-bottom:5px}
-  .search .f input,.search .f select{width:100%;font-family:var(--serif);font-size:1.1rem;color:var(--tinta);font-weight:500;border:0;background:transparent;padding:0;color-scheme:inherit}
-  .search .f input:focus,.search .f select:focus{outline:none}
-  .search .go{display:flex;align-items:stretch}
-  .search .go .btn{border-radius:0;display:flex;align-items:center}
-  @media(max-width:460px){.search .go .btn{width:100%;justify-content:center;padding:14px}}
-
-  section{padding-block:60px}
-  .sec-head{text-align:center;max-width:540px;margin:0 auto 38px}
-  .sec-head h2{font-size:clamp(1.9rem,4vw,2.7rem);margin-top:10px}
-  .sec-head p{color:var(--tinta2);margin-top:10px}
-
-  /* grid de habitaciones / resultados */
-  .rooms{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
-  @media(max-width:860px){.rooms{grid-template-columns:1fr 1fr}}
-  @media(max-width:560px){.rooms{grid-template-columns:1fr}}
-  .room{background:var(--papel);border:1px solid var(--linea);overflow:hidden;display:flex;flex-direction:column;transition:transform .22s,box-shadow .22s}
-  .room:hover{transform:translateY(-3px);box-shadow:0 20px 44px rgba(42,36,29,.13)}
-  .room .ph{height:190px;position:relative;background-color:var(--crema2);background-size:cover;background-position:center;overflow:hidden}
-  .room .ph::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 55%,rgba(42,36,29,.28))}
-  .room .tag{position:absolute;top:14px;left:14px;z-index:2;background:var(--papel);color:var(--vino);font-size:.64rem;letter-spacing:.1em;text-transform:uppercase;font-weight:700;padding:4px 11px;border:1px solid var(--linea)}
-  .room .tag.mant{color:var(--tinta2)}
-  .room .body{padding:22px;display:flex;flex-direction:column;flex:1}
-  .room h3{font-size:1.5rem}
-  .room .meta{font-size:.68rem;color:var(--tinta2);margin:4px 0 16px;letter-spacing:.16em;text-transform:uppercase}
-  .room .foot{display:flex;align-items:baseline;justify-content:space-between;border-top:1px solid var(--linea);padding-top:14px;margin-top:auto}
-  .room .price b{font-family:var(--sans);font-size:1.4rem;color:var(--vino);font-weight:700;letter-spacing:-.01em}
-  .room .price span{font-size:.74rem;color:var(--tinta2)}
-
-  /* experiencias */
-  .exp{background:var(--vino);color:#fbeee2}
-  .exp .sec-head h2{color:#fff}.exp .sec-head p{color:#e8c9ce}
-  .exp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
-  @media(max-width:760px){.exp-grid{grid-template-columns:1fr}}
-  .exp-card{border:1px solid rgba(251,238,226,.22);padding:26px 24px}
-  .exp-card h3{font-size:1.4rem;margin:0 0 6px;color:#fff}
-  .exp-card p{font-size:.86rem;color:#e8c9ce;margin:0 0 12px}
-  .exp-card .pr{font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--oro-claro)}
-
-  footer{background:var(--crema2);border-top:1px solid var(--linea);padding-block:36px;text-align:center}
-  footer p{color:var(--tinta2);font-size:.8rem;margin:3px 0}
-
-  /* ---------- MODAL / PASOS DE RESERVA ---------- */
-  .overlay{position:fixed;inset:0;z-index:60;background:rgba(20,15,10,.55);backdrop-filter:blur(3px);display:flex;align-items:flex-start;justify-content:center;padding:28px 16px;overflow-y:auto}
-  .modal{background:var(--crema);border:1px solid var(--linea);max-width:680px;width:100%;box-shadow:0 30px 80px rgba(0,0,0,.4);margin:auto}
-  .modal-h{display:flex;align-items:center;justify-content:space-between;padding:20px 26px;border-bottom:1px solid var(--linea);background:var(--papel);position:sticky;top:0}
-  .modal-h h3{font-size:1.5rem}
-  .modal-h .x{border:0;background:none;font-size:1.5rem;color:var(--tinta2);cursor:pointer;line-height:1;padding:4px}
-  .modal-b{padding:26px}
-  .steps{display:flex;gap:6px;margin-bottom:22px}
-  .steps .s{flex:1;height:3px;background:var(--linea);border-radius:2px}
-  .steps .s.on{background:var(--oro)}
-  label.fl{display:block;font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;color:var(--oro);font-weight:600;margin:14px 0 6px}
-  input.in,select.in{width:100%;font-family:var(--sans);font-size:.95rem;padding:11px 13px;border:1px solid var(--linea);border-radius:3px;background:var(--papel);color:var(--tinta)}
-  input.in:focus,select.in:focus{outline:2px solid var(--oro);outline-offset:1px;border-color:transparent}
-  .row2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-  @media(max-width:460px){.row2{grid-template-columns:1fr}}
-  .resumen{background:var(--papel);border:1px solid var(--linea);padding:18px 20px;margin-top:4px}
-  .resumen .li{display:flex;justify-content:space-between;padding:7px 0;font-size:.92rem;border-bottom:1px solid var(--linea)}
-  .resumen .li:last-child{border-bottom:0}
-  .resumen .li.tot{border-top:2px solid var(--oro);margin-top:6px;padding-top:12px;font-size:1.15rem;font-weight:700;font-variant-numeric:tabular-nums}
-  .resumen .li.tot b{color:var(--vino)}
-  .addons{display:flex;flex-direction:column;gap:10px;margin-top:6px}
-  .addon{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--linea);background:var(--papel);cursor:pointer}
-  .addon input{width:18px;height:18px;accent-color:var(--vino)}
-  .addon .info{flex:1}
-  .addon .info b{font-family:var(--serif);font-size:1.1rem;font-weight:600;display:block}
-  .addon .info span{font-size:.8rem;color:var(--tinta2)}
-  .addon .pr{font-size:1.05rem;color:var(--vino);font-weight:700;font-variant-numeric:tabular-nums}
-  .msg{padding:11px 14px;border-radius:3px;font-size:.88rem;margin-top:14px}
-  .msg.err{background:color-mix(in srgb,var(--err) 14%,transparent);color:var(--err);border-left:3px solid var(--err)}
-  .msg.ok{background:color-mix(in srgb,var(--ok) 14%,transparent);color:var(--ok);border-left:3px solid var(--ok)}
-  .modal-foot{display:flex;justify-content:space-between;gap:12px;margin-top:24px}
-  .success{text-align:center;padding:14px 0}
-  .success .ic{width:68px;height:68px;border-radius:50%;background:color-mix(in srgb,var(--ok) 18%,transparent);color:var(--ok);display:flex;align-items:center;justify-content:center;font-size:2rem;margin:0 auto 16px}
-  .success h3{font-size:2rem;color:var(--tinta)}
-  .success .code{font-family:var(--serif);font-size:1.4rem;color:var(--vino);margin:8px 0}
-  .hint{font-size:.76rem;color:var(--tinta2);margin-top:8px}
-  .toggle{display:flex;align-items:center;gap:8px;margin-top:12px;font-size:.84rem;color:var(--tinta2);cursor:pointer}
-  .toggle input{accent-color:var(--vino)}
-  .skeleton{text-align:center;color:var(--tinta2);font-style:italic;padding:40px 0}
-  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
-</style>
-
-<nav><div class="wrap nav-in">
-  <button class="logo" onclick="irInicio()">JW Marriott<span class="sm">Hotel Lima</span></button>
-  <div class="nav-right">
-    <span class="who" id="who" hidden>Hola, <b id="whoName">—</b></span>
-    <button class="btn line sm" id="btnMis" hidden onclick="verMisReservas()">Mis reservas</button>
-    <button class="btn line sm" id="btnLogin" onclick="abrirLogin()">Ingresar</button>
-    <button class="btn sm" id="btnSalir" hidden onclick="salir()">Salir</button>
-  </div>
-</div></nav>
-
-<!-- INICIO -->
-<div id="vInicio">
-  <header class="hero"><div class="wrap hero-in">
-    <div class="hero-txt">
-      <div class="eyebrow c">Miraflores · Frente al mar</div>
-      <h1>Una estancia <em>inolvidable</em> sobre el Pacífico</h1>
-      <p>Lujo señorial en el corazón de Lima. Reserva tu habitación, añade experiencias turísticas y vive una estadía a tu medida.</p>
-      <button class="btn" onclick="document.getElementById('buscador').scrollIntoView({behavior:'smooth'})">Reservar ahora</button>
+<!-- ================= NAV ================= -->
+<nav>
+  <div class="wrap nav-in">
+    <button class="logo" data-go="inicio">JW&nbsp;Marriott<span class="sm">Hotel Lima</span></button>
+    <div class="nav-links">
+      <a data-go="habitaciones">Habitaciones</a>
+      <a data-go="gastronomia">Gastronomía</a>
+      <a data-go="areas">Experiencias</a>
+      <a data-go="galeria">Galería</a>
+      <a data-go="contacto">Contacto</a>
     </div>
-    <div class="hero-img"><div class="badge">
-      <div class="stars">★★★★★</div><h3>Gran Lujo frente al malecón</h3><span>Miraflores, Lima — Perú</span>
-    </div></div>
-  </div></header>
-
-  <div class="wrap"><div class="search" id="buscador">
-    <div class="f"><label>Llegada</label><input class="in2" type="date" id="fDesde"></div>
-    <div class="f"><label>Salida</label><input class="in2" type="date" id="fHasta"></div>
-    <div class="f"><label>Tipo</label><select id="fTipo">
-      <option value="">Todas</option><option>SIMPLE</option><option>DOBLE</option><option>SUITE</option><option>PRESIDENCIAL</option>
-    </select></div>
-    <div class="go"><button class="btn oro" onclick="buscar()">Buscar</button></div>
+    <div class="nav-right">
+      <button class="btn sm oro" data-go="habitaciones">Reservar</button>
+      <button class="burger" id="burger" aria-label="Menú"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+  <div class="wrap"><div class="mobile-menu" id="mobileMenu">
+    <a data-go="habitaciones">Habitaciones</a>
+    <a data-go="gastronomia">Gastronomía</a>
+    <a data-go="areas">Experiencias</a>
+    <a data-go="galeria">Galería</a>
+    <a data-go="contacto">Contacto</a>
   </div></div>
+</nav>
 
-  <section class="wrap">
-    <div class="sec-head"><div class="eyebrow">Alojamiento</div><h2 id="roomsTitle">Habitaciones y Suites</h2><p id="roomsSub">Elige una fecha y descubre la disponibilidad en vivo.</p></div>
-    <div class="rooms" id="rooms"><div class="skeleton">Cargando habitaciones…</div></div>
-  </section>
+<!-- ================= HERO ================= -->
+<header class="hero" id="inicio" style="--hero-img:url('img/hero.jpg')">
+  <div class="wrap hero-in">
+    <span class="eyebrow">Miraflores · Frente al Pacífico</span>
+    <h1>Una estancia <em>inolvidable</em> sobre el mar</h1>
+    <p>Lujo señorial en el corazón de Lima, junto a Larcomar. Vive el Perú desde el hotel que mira al océano.</p>
+    <div class="hero-cta">
+      <button class="btn oro" data-go="habitaciones">Reservar ahora</button>
+      <button class="btn line" style="color:#fff;border-color:rgba(255,255,255,.6)" data-go="gastronomia">Descubrir el hotel</button>
+    </div>
+  </div>
+  <div class="scroll-cue">Desliza</div>
+</header>
 
-  <section class="exp"><div class="wrap">
-    <div class="sec-head"><h2>Experiencias Turísticas</h2><p>Añade un tour o un paquete a tu reserva.</p></div>
-    <div class="exp-grid" id="exps"><div class="skeleton" style="color:#e8c9ce">Cargando experiencias…</div></div>
-  </div></section>
+<!-- ================= BUSCADOR ================= -->
+<div class="wrap">
+  <div class="search">
+    <div class="f"><label>Check-in</label><input type="date" id="hIn"></div>
+    <div class="f"><label>Check-out</label><input type="date" id="hOut"></div>
+    <div class="f"><label>Huéspedes</label>
+      <select id="hHue"><option>1</option><option selected>2</option><option>3</option><option>4</option></select>
+    </div>
+    <div class="go"><button class="btn oro" id="heroBuscar">Buscar disponibilidad</button></div>
+  </div>
 </div>
 
-<!-- MIS RESERVAS -->
-<div id="vMis" hidden><section class="wrap">
-  <div class="sec-head"><div class="eyebrow">Tu historial</div><h2>Mis reservas</h2></div>
-  <div id="misLista"><div class="skeleton">Cargando…</div></div>
-  <div style="text-align:center;margin-top:24px"><button class="btn line" onclick="irInicio()">Volver al inicio</button></div>
-</section></div>
-
-<footer><div class="wrap">
-  <p style="font-family:var(--serif);font-size:1.2rem;color:var(--tinta)">JW Marriott Hotel Lima</p>
-  <p>Malecón de la Reserva, Miraflores · Lima — Perú · +51 (1) 217-7000</p>
-</div></footer>
-
-<!-- OVERLAY MODAL -->
-<div class="overlay" id="overlay" hidden><div class="modal">
-  <div class="modal-h"><h3 id="mTitle">Reservar</h3><button class="x" onclick="cerrar()" aria-label="Cerrar">×</button></div>
-  <div class="modal-b" id="mBody"></div>
-</div></div>
-
-<script>
-const API = ""; // mismo origen (nginx hace proxy a /api). Para pruebas locales, poner https://soaapi.marioaponte.me
-const $ = s => document.querySelector(s);
-const money = n => "S/ " + Number(n).toLocaleString("es-PE",{minimumFractionDigits:2,maximumFractionDigits:2});
-let TOKEN="", USER=null, CATALOGO={habs:[],tours:[],paquetes:[]}, SELECC={};
-
-// fechas por defecto: mañana y +3
-(function initFechas(){
-  const hoy=new Date(); const d1=new Date(hoy); d1.setDate(d1.getDate()+1); const d2=new Date(hoy); d2.setDate(d2.getDate()+4);
-  const f=x=>x.toISOString().slice(0,10);
-  try{ $("#fDesde").value=f(d1); $("#fHasta").value=f(d2); }catch(e){}
-})();
-
-async function api(path, opts={}){
-  const h = Object.assign({"Content-Type":"application/json"}, opts.headers||{});
-  if(TOKEN) h["Authorization"]="Bearer "+TOKEN;
-  const r = await fetch(API+path, Object.assign({}, opts, {headers:h}));
-  const txt = await r.text();
-  let data; try{ data = txt?JSON.parse(txt):null; }catch(e){ data = txt; }
-  if(!r.ok){ const e=new Error((data&&data.mensaje)||("Error "+r.status)); e.status=r.status; e.data=data; throw e; }
-  return data;
-}
-
-// ---------- catálogo (público: necesita token; usamos uno de invitado al vuelo) ----------
-async function tokenInvitado(){
-  if(TOKEN) return;
-  const d = await api("/api/v1/auth/token",{method:"POST",body:JSON.stringify({usuario:"cliente",clave:"cliente123"})});
-  TOKEN = d.access_token; // token de solo-lectura para mostrar catálogo; la reserva pide login real igual
-}
-
-async function cargarCatalogo(){
-  try{
-    await tokenInvitado();
-    const [habs,tours,paq] = await Promise.all([
-      api("/api/v1/habitaciones"),
-      api("/api/v1/tours"),
-      api("/api/v1/paquetes?activo=true")
-    ]);
-    CATALOGO.habs = habs.disponibles||[];
-    CATALOGO.tours = tours||[];
-    CATALOGO.paquetes = paq||[];
-    pintarRooms(CATALOGO.habs);
-    pintarExps();
-  }catch(e){
-    $("#rooms").innerHTML='<div class="skeleton">No se pudo conectar con el hotel. Intenta más tarde.<br><small>'+(e.message||"")+'</small></div>';
-  }
-}
-
-// Fotos por tipo de habitación — Unsplash (libres de derechos, licencia gratuita).
-const FOTO={
-  SIMPLE:"img/simple.jpg",
-  DOBLE:"img/doble.jpg",
-  SUITE:"img/suite.jpg",
-  PRESIDENCIAL:"img/presidencial.jpg"
-};
-function pintarRooms(lista){
-  if(!lista.length){ $("#rooms").innerHTML='<div class="skeleton">Sin habitaciones para esas fechas. Prueba otro rango.</div>'; return; }
-  const nombre={SIMPLE:"Habitación Simple",DOBLE:"Habitación Doble",SUITE:"Suite Ejecutiva",PRESIDENCIAL:"Suite Presidencial"};
-  $("#rooms").innerHTML = lista.map(h=>{
-    const dispon = h.estado==="DISPONIBLE";
-    const tag = h.estado==="MANTENIMIENTO" ? '<span class="tag mant">En mantenimiento</span>'
-      : (h.tipo==="PRESIDENCIAL"?'<span class="tag">Exclusiva</span>':(h.tipo==="SUITE"?'<span class="tag">Favorita</span>':''));
-    const foto = FOTO[h.tipo] || FOTO.SIMPLE;
-    return `<div class="room"><div class="ph" style="background-image:url('${foto}')">${tag}</div><div class="body">
-      <h3>${nombre[h.tipo]||h.tipo}</h3>
-      <div class="meta">Piso ${h.piso} · ${h.id}</div>
-      <div class="foot"><div class="price"><b>${money(h.tarifa_noche)}</b> <span>/ noche</span></div>
-      ${dispon?`<button class="btn line sm" onclick='reservar(${JSON.stringify(h)})'>Reservar</button>`
-             :`<button class="btn line sm" disabled>No disponible</button>`}</div>
-    </div></div>`;
-  }).join("");
-}
-
-function pintarExps(){
-  const t = CATALOGO.tours.map(x=>`<div class="exp-card"><h3>${x.nombre}</h3>
-    <p>${x.fecha||""} · ${x.cupo_disponible??"—"} cupos</p><div class="pr">${money(x.precio)}</div></div>`).join("");
-  const p = CATALOGO.paquetes.map(x=>`<div class="exp-card"><h3>${x.nombre}</h3>
-    <p>${x.descripcion||""}</p><div class="pr">${money(x.precio)}</div></div>`).join("");
-  $("#exps").innerHTML = (t+p) || '<div class="skeleton" style="color:#e8c9ce">Sin experiencias por ahora.</div>';
-}
-
-async function buscar(){
-  const desde=$("#fDesde").value, hasta=$("#fHasta").value, tipo=$("#fTipo").value;
-  if(!desde||!hasta){ alert("Elige fecha de llegada y salida."); return; }
-  $("#rooms").innerHTML='<div class="skeleton">Buscando disponibilidad…</div>';
-  $("#roomsTitle").textContent="Disponibilidad"; $("#roomsSub").textContent=`Del ${desde} al ${hasta}`;
-  try{
-    await tokenInvitado();
-    let q=`/api/v1/habitaciones?desde=${desde}&hasta=${hasta}`; if(tipo) q+=`&tipo=${tipo}`;
-    const r = await api(q);
-    CATALOGO.habs = r.disponibles||[];
-    pintarRooms(CATALOGO.habs);
-    document.getElementById('rooms').scrollIntoView({behavior:'smooth',block:'start'});
-  }catch(e){
-    $("#rooms").innerHTML='<div class="skeleton">'+(e.message||"Error al buscar")+'</div>';
-  }
-}
-
-// ---------- login ----------
-function abrirLogin(){ $("#mTitle").textContent="Ingresar"; $("#mBody").innerHTML=loginHTML(); mostrar(); }
-function loginHTML(){ return `
-  <p style="color:var(--tinta2);margin:0 0 6px">Ingresa para gestionar tus reservas.</p>
-  <label class="fl">Usuario</label><input class="in" id="lu" value="cliente" autocomplete="username">
-  <label class="fl">Clave</label><input class="in" id="lp" type="password" value="cliente123" autocomplete="current-password">
-  <div class="msg err" id="lerr" hidden></div>
-  <div class="modal-foot"><span></span><button class="btn" onclick="hacerLogin()">Ingresar</button></div>
-  <p class="hint">Cuenta de demostración: cliente / cliente123</p>`;
-}
-async function hacerLogin(){
-  const u=$("#lu").value.trim(), p=$("#lp").value;
-  try{
-    const d = await api("/api/v1/auth/token",{method:"POST",body:JSON.stringify({usuario:u,clave:p})});
-    TOKEN=d.access_token; USER={usuario:d.usuario,roles:d.roles};
-    sesionUI(); cerrar();
-    if(pendienteReserva){ const h=pendienteReserva; pendienteReserva=null; reservar(h); }
-  }catch(e){ const el=$("#lerr"); el.hidden=false; el.textContent = e.status===401?"Usuario o clave incorrectos.":e.message; }
-}
-function sesionUI(){
-  const logged = !!USER;
-  $("#who").hidden=!logged; $("#btnMis").hidden=!logged; $("#btnSalir").hidden=!logged; $("#btnLogin").hidden=logged;
-  if(logged) $("#whoName").textContent=USER.usuario;
-}
-function salir(){ USER=null; TOKEN=""; sesionUI(); irInicio(); }
-
-// ---------- flujo de reserva ----------
-let pendienteReserva=null;
-function reservar(hab){
-  if(!USER){ pendienteReserva=hab; abrirLogin(); return; }
-  SELECC={hab, tour:null, paquete:null, desde:$("#fDesde").value, hasta:$("#fHasta").value};
-  $("#mTitle").textContent="Tu reserva"; $("#mBody").innerHTML=paso1HTML(); mostrar();
-}
-function noches(){ const a=new Date(SELECC.desde),b=new Date(SELECC.hasta); return Math.max(1,Math.round((b-a)/86400000)); }
-function totalReserva(){
-  let t = SELECC.hab.tarifa_noche*noches();
-  if(SELECC.tour) t+=SELECC.tour.precio;
-  if(SELECC.paquete) t+=SELECC.paquete.precio;
-  return t;
-}
-const nombreHab={SIMPLE:"Habitación Simple",DOBLE:"Habitación Doble",SUITE:"Suite Ejecutiva",PRESIDENCIAL:"Suite Presidencial"};
-
-function paso1HTML(){
-  const toursHTML = CATALOGO.tours.map(x=>`
-    <label class="addon"><input type="checkbox" onchange="toggleTour('${x.id}')" ${SELECC.tour&&SELECC.tour.id===x.id?'checked':''}>
-      <div class="info"><b>${x.nombre}</b><span>Tour · ${x.fecha||""}</span></div><div class="pr">${money(x.precio)}</div></label>`).join("");
-  const paqHTML = CATALOGO.paquetes.map(x=>`
-    <label class="addon"><input type="checkbox" onchange="togglePaq('${x.id}')" ${SELECC.paquete&&SELECC.paquete.id===x.id?'checked':''}>
-      <div class="info"><b>${x.nombre}</b><span>Paquete</span></div><div class="pr">${money(x.precio)}</div></label>`).join("");
-  return `
-  <div class="steps"><div class="s on"></div><div class="s"></div><div class="s"></div></div>
-  <div class="eyebrow">Paso 1 de 3 · Tu estadía</div>
-  <div class="resumen" style="margin-top:14px">
-    <div class="li"><span>${nombreHab[SELECC.hab.tipo]||SELECC.hab.tipo} (${SELECC.hab.id})</span><span>${money(SELECC.hab.tarifa_noche)} × ${noches()} noches</span></div>
-    <div class="li"><span>Fechas</span><span>${SELECC.desde} → ${SELECC.hasta}</span></div>
-  </div>
-  <label class="fl" style="margin-top:20px">Añade experiencias (opcional)</label>
-  <div class="addons">${toursHTML}${paqHTML || ''}</div>
-  <div id="totBox"></div>
-  <div class="modal-foot"><button class="btn line" onclick="cerrar()">Cancelar</button><button class="btn" onclick="irPaso2()">Continuar</button></div>`;
-}
-function pintarTot(){ const box=$("#totBox"); if(box) box.innerHTML=`<div class="resumen" style="margin-top:16px"><div class="li tot"><span>Total</span><b>${money(totalReserva())}</b></div></div>`; }
-function toggleTour(id){ const t=CATALOGO.tours.find(x=>x.id===id); SELECC.tour = (SELECC.tour&&SELECC.tour.id===id)?null:t; pintarTot(); }
-function togglePaq(id){ const p=CATALOGO.paquetes.find(x=>x.id===id); SELECC.paquete = (SELECC.paquete&&SELECC.paquete.id===id)?null:p; pintarTot(); }
-
-function irPaso2(){ $("#mBody").innerHTML=paso2HTML(); }
-function paso2HTML(){
-  return `
-  <div class="steps"><div class="s on"></div><div class="s on"></div><div class="s"></div></div>
-  <div class="eyebrow">Paso 2 de 3 · Pago</div>
-  <div class="resumen" style="margin:14px 0">
-    <div class="li"><span>${nombreHab[SELECC.hab.tipo]} × ${noches()} noches</span><span>${money(SELECC.hab.tarifa_noche*noches())}</span></div>
-    ${SELECC.tour?`<div class="li"><span>${SELECC.tour.nombre}</span><span>${money(SELECC.tour.precio)}</span></div>`:""}
-    ${SELECC.paquete?`<div class="li"><span>${SELECC.paquete.nombre}</span><span>${money(SELECC.paquete.precio)}</span></div>`:""}
-    <div class="li tot"><span>Total a pagar</span><b>${money(totalReserva())}</b></div>
-  </div>
-  <label class="fl">Método de pago</label>
-  <select class="in" id="pMetodo"><option value="TARJETA">Tarjeta de crédito</option><option value="YAPE">Yape</option><option value="TRANSFERENCIA">Transferencia</option></select>
-  <label class="fl">Número de tarjeta</label>
-  <input class="in" id="pTarjeta" value="4242 4242 4242 4242" inputmode="numeric">
-  <label class="toggle"><input type="checkbox" id="pFallar"> Simular pago rechazado (para demostración)</label>
-  <div class="msg err" id="perr" hidden></div>
-  <div class="modal-foot"><button class="btn line" onclick="volverPaso1()">Atrás</button><button class="btn oro" id="btnPagar" onclick="confirmar()">Pagar y confirmar</button></div>
-  <p class="hint">Pago simulado — no se cobra dinero real.</p>`;
-}
-function volverPaso1(){ $("#mBody").innerHTML=paso1HTML(); pintarTot(); }
-
-async function confirmar(){
-  const metodo=$("#pMetodo").value;
-  const fallar=$("#pFallar").checked;
-  const token = fallar ? "tok_rechazo" : "tok_"+Math.random().toString(36).slice(2,8);
-  const btn=$("#btnPagar"); btn.disabled=true; btn.textContent="Procesando…";
-  const err=$("#perr"); err.hidden=true;
-  const idem = "web-"+SELECC.hab.id+"-"+Date.now();
-  const body = {
-    cliente_id: clienteIdActual(),
-    habitacion_id: SELECC.hab.id,
-    desde: SELECC.desde, hasta: SELECC.hasta,
-    tour_id: SELECC.tour?SELECC.tour.id:null,
-    paquete_id: SELECC.paquete?SELECC.paquete.id:null,
-    pago: { metodo, token_tarjeta: token }
-  };
-  try{
-    const r = await api("/api/v1/reservas",{method:"POST",headers:{"Idempotency-Key":idem},body:JSON.stringify(body)});
-    $("#mBody").innerHTML = exitoHTML(r);
-  }catch(e){
-    btn.disabled=false; btn.textContent="Pagar y confirmar";
-    err.hidden=false;
-    if(e.status===402) err.textContent="Pago rechazado: "+(e.data&&e.data.mensaje||"intenta con otro método.");
-    else if(e.status===409) err.textContent="Esa habitación ya no tiene cupo en esas fechas. Vuelve y elige otra.";
-    else err.textContent = e.message||"No se pudo completar la reserva.";
-  }
-}
-// El cliente demo no tiene un CLI-xxxx propio; usamos un id de cliente existente para la demo.
-function clienteIdActual(){ return "CLI-000123"; }
-
-function exitoHTML(r){
-  return `<div class="success">
-    <div class="ic">✓</div>
-    <h3>¡Reserva confirmada!</h3>
-    <div class="code">${r.reserva_id||r.reservaId||""}</div>
-    <p style="color:var(--tinta2)">${nombreHab[SELECC.hab.tipo]} · ${noches()} noches${SELECC.tour?" · "+SELECC.tour.nombre:""}${SELECC.paquete?" · "+SELECC.paquete.nombre:""}</p>
-    <div class="resumen" style="margin:18px 0;text-align:left">
-      <div class="li"><span>Estado</span><span style="color:var(--ok)">${r.estado||"CONFIRMADA"}</span></div>
-      <div class="li"><span>Pago</span><span>${(r.pago&&r.pago.estado)||"APROBADO"}</span></div>
-      <div class="li tot"><span>Total</span><b>${money(r.total||totalReserva())}</b></div>
+<!-- ================= HABITACIONES (API) ================= -->
+<section class="section" id="habitaciones">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow c">Alojamiento</span>
+      <h2>Habitaciones &amp; <em>Suites</em></h2>
+      <p>Disponibilidad y tarifas en vivo desde nuestro sistema de reservas. Elige tu espacio y reserva en segundos.</p>
     </div>
-    <button class="btn" onclick="cerrar();verMisReservas()">Ver mis reservas</button>
-  </div>`;
-}
+    <div class="rooms" id="roomsGrid"><div class="skeleton">Cargando disponibilidad en vivo…</div></div>
+  </div>
+</section>
 
-// ---------- mis reservas ----------
-async function verMisReservas(){
-  if(!USER){ abrirLogin(); return; }
-  $("#vInicio").hidden=true; $("#vMis").hidden=false; window.scrollTo(0,0);
-  $("#misLista").innerHTML='<div class="skeleton">Cargando…</div>';
-  try{
-    const r = await api("/api/v1/reservas?cliente_id="+clienteIdActual());
-    if(!r.length){ $("#misLista").innerHTML='<div class="skeleton">Aún no tienes reservas.</div>'; return; }
-    $("#misLista").innerHTML = '<div class="rooms">'+r.map(x=>`
-      <div class="room"><div class="body">
-        <h3>${x.reserva_id||x.reservaId}</h3>
-        <div class="meta">${x.desde} → ${x.hasta} · ${x.noches} noches</div>
-        <div style="font-size:.9rem;color:var(--tinta2);margin-bottom:12px">${(x.items||[]).join("<br>")}</div>
-        <div class="foot"><div class="price"><b>${money(x.total)}</b></div>
-          <span class="btn line sm" style="cursor:default">${x.estado}</span></div>
-      </div></div>`).join("")+'</div>';
-  }catch(e){ $("#misLista").innerHTML='<div class="skeleton">'+(e.message||"Error")+'</div>'; }
-}
+<!-- ================= GASTRONOMÍA / RESTOBAR ================= -->
+<section class="section alt" id="gastronomia">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow c">Sabores del Perú</span>
+      <h2>Gastronomía &amp; <em>Restobar</em></h2>
+      <p>Alta cocina peruana, coctelería de autor y un desayuno buffet con vista al mar.</p>
+    </div>
+    <div class="gastro">
+      <div class="dish"><img src="img/plato1.jpg" alt="Alta cocina peruana"><div class="cap"><h3>La Vista</h3><p>Alta cocina peruana · 19:00–23:00 h</p></div></div>
+      <div class="dish"><img src="img/bar.jpg" alt="Celesté Restobar"><div class="cap"><h3>Celesté Restobar</h3><p>Coctelería de autor · 12:00–00:00 h</p></div></div>
+      <div class="dish"><img src="img/desayuno.jpg" alt="Desayuno buffet"><div class="cap"><h3>Desayuno Buffet</h3><p>Frente al Pacífico · 06:00–10:30 h</p></div></div>
+    </div>
+    <div class="venues">
+      <div class="venue"><img src="img/roomservice.jpg" alt="Room service"><div class="vb"><h3>Room Service 24 h</h3><p>La experiencia del restobar en la comodidad de tu habitación, a cualquier hora.</p><div class="h">Las 24 horas</div></div></div>
+      <div class="venue"><img src="img/lounge.jpg" alt="Lounge"><div class="vb"><h3>Executive Lounge</h3><p>Bebidas, bocados y vistas privilegiadas para huéspedes de pisos ejecutivos.</p><div class="h">16:00–20:00 h</div></div></div>
+    </div>
+  </div>
+</section>
 
-// ---------- utilidades modal/vistas ----------
-function mostrar(){ $("#overlay").hidden=false; document.body.style.overflow="hidden"; }
-function cerrar(){ $("#overlay").hidden=true; document.body.style.overflow=""; }
-function irInicio(){ $("#vMis").hidden=true; $("#vInicio").hidden=false; window.scrollTo(0,0); }
-$("#overlay").addEventListener("click",e=>{ if(e.target===$("#overlay")) cerrar(); });
+<!-- ================= ÁREAS / EXPERIENCIAS ================= -->
+<section class="section" id="areas">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow c">Bienestar &amp; Entretenimiento</span>
+      <h2>Áreas de <em>Esparcimiento</em></h2>
+      <p>Piscina temperada, spa de aguas, gimnasio y salones para cada ocasión.</p>
+    </div>
+    <div class="areas">
+      <div class="area"><img src="img/piscina.jpg" alt="Piscina"><div class="ov"><h3>Piscina Temperada</h3><p>En la azotea, con vista panorámica a Miraflores.</p></div></div>
+      <div class="area"><img src="img/spa.jpg" alt="Spa"><div class="ov"><h3>Spa &amp; Wellness</h3><p>Circuito de aguas, masajes y rituales andinos.</p></div></div>
+      <div class="area"><img src="img/gimnasio.jpg" alt="Gimnasio"><div class="ov"><h3>Fitness 24 h</h3><p>Equipamiento Technogym y entrenadores a tu disposición.</p></div></div>
+      <div class="area"><img src="img/eventos.jpg" alt="Eventos"><div class="ov"><h3>Salones &amp; Eventos</h3><p>Bodas y congresos hasta 500 personas.</p></div></div>
+      <div class="area"><img src="img/banquete.jpg" alt="Banquetes"><div class="ov"><h3>Banquetes</h3><p>Menús de autor para celebraciones memorables.</p></div></div>
+      <div class="area"><img src="img/larcomar.jpg" alt="Larcomar"><div class="ov"><h3>Larcomar a tus pies</h3><p>Compras, cine y gastronomía junto al hotel.</p></div></div>
+    </div>
+  </div>
+</section>
 
-cargarCatalogo();
-</script>
+<!-- ================= GALERÍA ================= -->
+<section class="section alt" id="galeria">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow c">El hotel en imágenes</span>
+      <h2>Galería</h2>
+    </div>
+    <div class="gallery">
+      <img src="img/gal1.jpg" alt="" onclick="abrirFoto('img/gal1.jpg')">
+      <img src="img/gal2.jpg" alt="" onclick="abrirFoto('img/gal2.jpg')">
+      <img src="img/gal3.jpg" alt="" onclick="abrirFoto('img/gal3.jpg')">
+      <img src="img/gal4.jpg" alt="" onclick="abrirFoto('img/gal4.jpg')">
+      <img src="img/gal5.jpg" alt="" onclick="abrirFoto('img/gal5.jpg')">
+      <img src="img/gal6.jpg" alt="" onclick="abrirFoto('img/gal6.jpg')">
+      <img src="img/gal7.jpg" alt="" onclick="abrirFoto('img/gal7.jpg')">
+      <img src="img/gal8.jpg" alt="" onclick="abrirFoto('img/gal8.jpg')">
+    </div>
+  </div>
+</section>
+
+<!-- ================= CONTACTO ================= -->
+<section class="section" id="contacto">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow c">Estamos para ti</span>
+      <h2>Contacto &amp; <em>Ubicación</em></h2>
+    </div>
+    <div class="contact">
+      <div class="info">
+        <p><b>Dirección</b><br>Malecón de la Reserva 615, Miraflores — Lima, Perú</p>
+        <p><b>Reservas</b><br>(01) 217-7000 · reservas.lima@marriott.com</p>
+        <p><b>Recepción</b><br>Atención las 24 horas, todos los días</p>
+        <p><b>Cómo llegar</b><br>A 40 min del Aeropuerto Internacional Jorge Chávez, junto a Larcomar.</p>
+        <div style="margin-top:18px"><button class="btn oro" data-go="habitaciones">Reservar mi estadía</button></div>
+      </div>
+      <div class="map-ph" role="img" aria-label="Ubicación del hotel frente al mar en Miraflores"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FOOTER ================= -->
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <div class="logo">JW&nbsp;Marriott <span style="font-size:.6rem;letter-spacing:.3em;color:var(--oro)">HOTEL LIMA</span></div>
+        <p style="max-width:40ch;margin-top:12px;opacity:.85">Lujo frente al Pacífico en el corazón de Miraflores. Una experiencia peruana de cinco estrellas.</p>
+      </div>
+      <div>
+        <h4>Explorar</h4>
+        <a data-go="habitaciones">Habitaciones</a>
+        <a data-go="gastronomia">Gastronomía</a>
+        <a data-go="areas">Experiencias</a>
+        <a data-go="galeria">Galería</a>
+      </div>
+      <div>
+        <h4>Contacto</h4>
+        <a>(01) 217-7000</a>
+        <a>reservas.lima@marriott.com</a>
+        <a>Malecón de la Reserva 615</a>
+        <a>Miraflores, Lima</a>
+      </div>
+    </div>
+    <div class="foot-bottom">© 2026 JW Marriott Hotel Lima · Proyecto académico SOA · UTP</div>
+  </div>
+</footer>
+
+<!-- ================= MODAL RESERVA ================= -->
+<div class="overlay" id="overlay" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-h"><h3 id="modalTitle">Tu estadía</h3><button class="x" onclick="cerrarReserva()" aria-label="Cerrar">×</button></div>
+    <div class="modal-b">
+      <div class="steps"><div class="s"></div><div class="s"></div><div class="s"></div></div>
+      <div id="modalBody"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= LIGHTBOX ================= -->
+<div class="lightbox" id="lightbox" hidden onclick="cerrarFoto()">
+  <button class="x" aria-label="Cerrar">×</button>
+  <img id="lbImg" src="" alt="">
+</div>
+
+<!-- ================= CHATBOT ================= -->
+<button class="chat-fab" id="chatFab" aria-label="Abrir asistente">💬</button>
+<div class="chat-panel" id="chatPanel" hidden>
+  <div class="chat-head">
+    <div class="av">J</div>
+    <div><b>Jacques</b><small>Concierge virtual · en línea</small></div>
+    <button class="x" id="chatClose" aria-label="Cerrar chat">×</button>
+  </div>
+  <div class="chat-body" id="chatBody"></div>
+  <div class="chips" id="chatChips"></div>
+  <form class="chat-input" id="chatForm" autocomplete="off">
+    <input id="chatText" placeholder="Escribe tu consulta…" aria-label="Mensaje">
+    <button type="submit" aria-label="Enviar">➤</button>
+  </form>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
