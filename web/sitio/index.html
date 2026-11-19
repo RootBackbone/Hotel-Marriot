@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>JW Marriott Hotel Lima — Reservas</title>
+<meta name="description" content="Hotel 5 estrellas frente al Pacífico en Miraflores, Lima. Habitaciones, restobar, spa, piscina y experiencias. Reserva en línea.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Marcellus&family=Playfair+Display:ital@1&family=Jost:wght@300;400;500;600&display=swap">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ================= NAV ================= -->
+<nav>
+  <div class="wrap nav-in">
+    <button class="logo" data-go="inicio">JW&nbsp;Marriott<span class="sm">Hotel Lima</span></button>
+    <div class="nav-links">
+      <a data-go="habitaciones">Habitaciones</a>
+      <a data-go="gastronomia">Gastronomía</a>
+      <a data-go="areas">Experiencias</a>
+      <a data-go="galeria">Galería</a>
+      <a data-go="contacto">Contacto</a>
+    </div>
+    <div class="nav-right">
+      <button class="btn sm oro" data-go="habitaciones">Reservar</button>
+      <button class="burger" id="burger" aria-label="Menú"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+  <div class="wrap"><div class="mobile-menu" id="mobileMenu">
+    <a data-go="habitaciones">Habitaciones</a>
+    <a data-go="gastronomia">Gastronomía</a>
+    <a data-go="areas">Experiencias</a>
+    <a data-go="galeria">Galería</a>
+    <a data-go="contacto">Contacto</a>
+  </div></div>
+</nav>
+
+<!-- ================= HERO ================= -->
+<header class="hero" id="inicio" style="--hero-img:url('img/hero.jpg')">
+  <div class="wrap hero-in">
+    <span class="eyebrow">Miraflores · Frente al Pacífico</span>
+    <h1>Una estancia <em>inolvidable</em> sobre el mar</h1>
+    <p>Lujo señorial en el corazón de Lima, junto a Larcomar. Vive el Perú desde el hotel que mira al océano.</p>
+    <div class="hero-cta">
+      <button class="btn oro" data-go="habitaciones">Reservar ahora</button>
+      <button class="btn line" style="color:#fff;border-color:rgba(255,255,255,.6)" data-go="gastronomia">Descubrir el hotel</button>
+    </div>
+  </div>
+  <div class="scroll-cue">Desliza</div>
+</header>
+
+<!-- ================= BUSCADOR ================= -->
+<div class="wrap">
+  <div class="search">
+    <div class="f"><label>Check-in</label><input type="date" id="hIn"></div>
+    <div class="f"><label>Check-out</label><input type="date" id="hOut"></div>
+    <div class="f"><label>Huéspedes</label>
+      <select id="hHue"><option>1</option><option selected>2</option><option>3</option><option>4</option></select>
+    </div>
+    <div class="go"><button class="btn oro" id="heroBuscar">Buscar disponibilidad</button></div>
+  </div>
+</div>
+
+<!-- ================= HABITACIONES (API) ================= -->
+<section class="section" id="habitaciones">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow c">Alojamiento</span>
+      <h2>Habitaciones &amp; <em>Suites</em></h2>
+      <p>Disponibilidad y tarifas en vivo desde nuestro sistema de reservas. Elige tu espacio y reserva en segundos.</p>
+    </div>
+    <div class="rooms" id="roomsGrid"><div class="skeleton">Cargando disponibilidad en vivo…</div></div>
+  </div>
+</section>
+
+<!-- ================= GASTRONOMÍA / RESTOBAR ================= -->
+<section class="section alt" id="gastronomia">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow c">Sabores del Perú</span>
+      <h2>Gastronomía &amp; <em>Restobar</em></h2>
+      <p>Alta cocina peruana, coctelería de autor y un desayuno buffet con vista al mar.</p>
+    </div>
+    <div class="gastro">
+      <div class="dish"><img src="img/plato1.jpg" alt="Alta cocina peruana"><div class="cap"><h3>La Vista</h3><p>Alta cocina peruana · 19:00–23:00 h</p></div></div>
+      <div class="dish"><img src="img/bar.jpg" alt="Celesté Restobar"><div class="cap"><h3>Celesté Restobar</h3><p>Coctelería de autor · 12:00–00:00 h</p></div></div>
+      <div class="dish"><img src="img/desayuno.jpg" alt="Desayuno buffet"><div class="cap"><h3>Desayuno Buffet</h3><p>Frente al Pacífico · 06:00–10:30 h</p></div></div>
+    </div>
+    <div class="venues">
+      <div class="venue"><img src="img/roomservice.jpg" alt="Room service"><div class="vb"><h3>Room Service 24 h</h3><p>La experiencia del restobar en la comodidad de tu habitación, a cualquier hora.</p><div class="h">Las 24 horas</div></div></div>
+      <div class="venue"><img src="img/lounge.jpg" alt="Lounge"><div class="vb"><h3>Executive Lounge</h3><p>Bebidas, bocados y vistas privilegiadas para huéspedes de pisos ejecutivos.</p><div class="h">16:00–20:00 h</div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= ÁREAS / EXPERIENCIAS ================= -->
+<section class="section" id="areas">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow c">Bienestar &amp; Entretenimiento</span>
+      <h2>Áreas de <em>Esparcimiento</em></h2>
+      <p>Piscina temperada, spa de aguas, gimnasio y salones para cada ocasión.</p>
+    </div>
+    <div class="areas">
+      <div class="area"><img src="img/piscina.jpg" alt="Piscina"><div class="ov"><h3>Piscina Temperada</h3><p>En la azotea, con vista panorámica a Miraflores.</p></div></div>
+      <div class="area"><img src="img/spa.jpg" alt="Spa"><div class="ov"><h3>Spa &amp; Wellness</h3><p>Circuito de aguas, masajes y rituales andinos.</p></div></div>
+      <div class="area"><img src="img/gimnasio.jpg" alt="Gimnasio"><div class="ov"><h3>Fitness 24 h</h3><p>Equipamiento Technogym y entrenadores a tu disposición.</p></div></div>
+      <div class="area"><img src="img/eventos.jpg" alt="Eventos"><div class="ov"><h3>Salones &amp; Eventos</h3><p>Bodas y congresos hasta 500 personas.</p></div></div>
+      <div class="area"><img src="img/banquete.jpg" alt="Banquetes"><div class="ov"><h3>Banquetes</h3><p>Menús de autor para celebraciones memorables.</p></div></div>
+      <div class="area"><img src="img/larcomar.jpg" alt="Larcomar"><div class="ov"><h3>Larcomar a tus pies</h3><p>Compras, cine y gastronomía junto al hotel.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= GALERÍA ================= -->
+<section class="section alt" id="galeria">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow c">El hotel en imágenes</span>
+      <h2>Galería</h2>
+    </div>
+    <div class="gallery">
+      <img src="img/gal1.jpg" alt="" onclick="abrirFoto('img/gal1.jpg')">
+      <img src="img/gal2.jpg" alt="" onclick="abrirFoto('img/gal2.jpg')">
+      <img src="img/gal3.jpg" alt="" onclick="abrirFoto('img/gal3.jpg')">
+      <img src="img/gal4.jpg" alt="" onclick="abrirFoto('img/gal4.jpg')">
+      <img src="img/gal5.jpg" alt="" onclick="abrirFoto('img/gal5.jpg')">
+      <img src="img/gal6.jpg" alt="" onclick="abrirFoto('img/gal6.jpg')">
+      <img src="img/gal7.jpg" alt="" onclick="abrirFoto('img/gal7.jpg')">
+      <img src="img/gal8.jpg" alt="" onclick="abrirFoto('img/gal8.jpg')">
+    </div>
+  </div>
+</section>
+
+<!-- ================= CONTACTO ================= -->
+<section class="section" id="contacto">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="eyebrow c">Estamos para ti</span>
+      <h2>Contacto &amp; <em>Ubicación</em></h2>
+    </div>
+    <div class="contact">
+      <div class="info">
+        <p><b>Dirección</b><br>Malecón de la Reserva 615, Miraflores — Lima, Perú</p>
+        <p><b>Reservas</b><br>(01) 217-7000 · reservas.lima@marriott.com</p>
+        <p><b>Recepción</b><br>Atención las 24 horas, todos los días</p>
+        <p><b>Cómo llegar</b><br>A 40 min del Aeropuerto Internacional Jorge Chávez, junto a Larcomar.</p>
+        <div style="margin-top:18px"><button class="btn oro" data-go="habitaciones">Reservar mi estadía</button></div>
+      </div>
+      <div class="map-ph" role="img" aria-label="Ubicación del hotel frente al mar en Miraflores"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FOOTER ================= -->
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <div class="logo">JW&nbsp;Marriott <span style="font-size:.6rem;letter-spacing:.3em;color:var(--oro)">HOTEL LIMA</span></div>
+        <p style="max-width:40ch;margin-top:12px;opacity:.85">Lujo frente al Pacífico en el corazón de Miraflores. Una experiencia peruana de cinco estrellas.</p>
+      </div>
+      <div>
+        <h4>Explorar</h4>
+        <a data-go="habitaciones">Habitaciones</a>
+        <a data-go="gastronomia">Gastronomía</a>
+        <a data-go="areas">Experiencias</a>
+        <a data-go="galeria">Galería</a>
+      </div>
+      <div>
+        <h4>Contacto</h4>
+        <a>(01) 217-7000</a>
+        <a>reservas.lima@marriott.com</a>
+        <a>Malecón de la Reserva 615</a>
+        <a>Miraflores, Lima</a>
+      </div>
+    </div>
+    <div class="foot-bottom">© 2026 JW Marriott Hotel Lima · Proyecto académico SOA · UTP</div>
+  </div>
+</footer>
+
+<!-- ================= MODAL DETALLE HABITACIÓN ================= -->
+<div class="overlay" id="detalle" hidden>
+  <div class="modal det" role="dialog" aria-modal="true" aria-labelledby="detTitle">
+    <div class="modal-h"><h3 id="detTitle">Detalle</h3><button class="x" onclick="cerrarDetalle()" aria-label="Cerrar">×</button></div>
+    <div class="modal-b" id="detBody"></div>
+  </div>
+</div>
+
+<!-- ================= MODAL RESERVA ================= -->
+<div class="overlay" id="overlay" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-h"><h3 id="modalTitle">Tu estadía</h3><button class="x" onclick="cerrarReserva()" aria-label="Cerrar">×</button></div>
+    <div class="modal-b">
+      <div class="steps"><div class="s"></div><div class="s"></div><div class="s"></div></div>
+      <div id="modalBody"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= LIGHTBOX ================= -->
+<div class="lightbox" id="lightbox" hidden onclick="cerrarFoto()">
+  <button class="x" aria-label="Cerrar">×</button>
+  <img id="lbImg" src="" alt="">
+</div>
+
+<!-- ================= CHATBOT ================= -->
+<button class="chat-fab" id="chatFab" aria-label="Abrir asistente">💬</button>
+<div class="chat-panel" id="chatPanel" hidden>
+  <div class="chat-head">
+    <div class="av">J</div>
+    <div><b>Jacques</b><small>Concierge virtual · en línea</small></div>
+    <button class="x" id="chatClose" aria-label="Cerrar chat">×</button>
+  </div>
+  <div class="chat-body" id="chatBody"></div>
+  <div class="chips" id="chatChips"></div>
+  <form class="chat-input" id="chatForm" autocomplete="off">
+    <input id="chatText" placeholder="Escribe tu consulta…" aria-label="Mensaje">
+    <button type="submit" aria-label="Enviar">➤</button>
+  </form>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
