@@ -8,14 +8,15 @@
 /* ---------- Config / estado ---------- */
 const API = "";                      // mismo origen; nginx hace proxy /api -> gateway
 const CLIENTE_DEMO = { usuario: "cliente", clave: "cliente123" };
-const CLIENTE_ID   = "CLI-000123";   // cliente demo para la reserva
 const FOTO = {
   SIMPLE:"img/simple.jpg", DOBLE:"img/doble.jpg",
   SUITE:"img/suite.jpg", PRESIDENCIAL:"img/presidencial.jpg"
 };
 const S = {                          // estado en memoria (sin localStorage en artifacts)
   token:null, habitaciones:[], paquetes:[], tours:[],
-  sel:{ hab:null, checkin:null, checkout:null, huespedes:2, paquete:null, tours:[] }
+  cliente:null,                      // ficha del cliente identificado por correo
+  sel:{ hab:null, checkin:null, checkout:null, huespedes:2, paquete:null, tours:[],
+        datos:{ nombres:"", apellidos:"", email:"", docTipo:"DNI", docNumero:"", telefono:"" } }
 };
 
 /* ---------- Utilidades ---------- */
@@ -43,6 +44,38 @@ async function asegurarToken(){
   const d = await api("/api/v1/auth/token", { method:"POST", body:JSON.stringify(CLIENTE_DEMO) });
   S.token = d.access_token || d.token || d.accessToken;
   return S.token;
+}
+
+/* ---------- Cliente: identificar por correo o registrar ----------
+   Busca la ficha por email (requiere que el backend permita GET /clientes?email=
+   al cliente autenticado; ver cambio de backend). Si no existe, la registra con
+   POST /clientes (público). Devuelve la ficha con su id (CLI-xxxxxx). */
+async function identificarCliente(datos){
+  await asegurarToken();
+  const body = {
+    nombres: datos.nombres.trim(),
+    apellidos: datos.apellidos.trim(),
+    email: datos.email.trim().toLowerCase(),
+    documento: { tipo: datos.docTipo, numero: datos.docNumero.trim() },
+    telefono: (datos.telefono||"").trim()
+  };
+  // 1) Intentar registrar. Si ya existe el correo, el backend responde 409 EMAIL_DUPLICADO.
+  try{
+    const c = await api("/api/v1/clientes", { method:"POST", body:JSON.stringify(body) });
+    return c;
+  }catch(e){
+    const dup = e.status===409 && e.data && /EMAIL_DUPLICAD|DOCUMENTO_DUPLICAD/i.test(e.data.error||"");
+    if(!dup) throw e;
+    // 2) Ya existe: buscar su ficha por correo (necesita el permiso de backend).
+    try{
+      const lista = await api("/api/v1/clientes?email="+encodeURIComponent(body.email));
+      const arr = Array.isArray(lista)?lista:(lista.content||lista.data||[]);
+      if(arr.length) return arr[0];
+    }catch(_){ /* sin permiso de lectura: caemos al aviso de abajo */ }
+    // 3) No se pudo recuperar el id: avisar para reintentar o usar otro correo.
+    throw { status:409, data:{ error:"CLIENTE_EXISTENTE",
+      mensaje:"Ya existe una cuenta con ese correo. Vuelve a intentar en un momento." } };
+  }
 }
 
 /* ===========================================================
@@ -240,10 +273,12 @@ function cerrarReserva(){ $("#overlay").hidden=true; document.body.style.overflo
 function render(){
   const b = $("#modalBody");
   $("#modalTitle").textContent =
-    PASO===1?"Tu estadía": PASO===2?"Personaliza tu experiencia":"Confirmación";
+    PASO===1?"Tu estadía": PASO===2?"Personaliza tu experiencia":
+    PASO===3?"Tus datos":"Confirmación y pago";
   $$(".steps .s").forEach((s,i)=>s.classList.toggle("on", i<PASO));
   if (PASO===1) b.innerHTML = paso1HTML();
   else if (PASO===2) b.innerHTML = paso2HTML();
+  else if (PASO===3) b.innerHTML = pasoDatosHTML();
   else b.innerHTML = paso3HTML();
 }
 
@@ -306,10 +341,53 @@ function paso2HTML(){
    ${(!paks.length&&!trs.length)?`<p style="color:var(--tinta2)">No hay experiencias adicionales disponibles. Puedes continuar con tu reserva.</p>`:""}
    <div class="modal-foot">
      <button class="btn line" onclick="PASO=1;render()">Atrás</button>
-     <button class="btn oro" onclick="PASO=3;render()">Ver resumen</button>
+     <button class="btn oro" onclick="PASO=3;render()">Continuar</button>
    </div>`;
 }
 function selPaquete(j){ S.sel.paquete = j?JSON.parse(j):null; }
+
+/* ---- Paso 3: Tus datos (identificación por correo, sin contraseña) ---- */
+function pasoDatosHTML(){
+  const d = S.sel.datos;
+  const docs = ["DNI","CE","PASAPORTE","RUC"];
+  return `
+   <p style="color:var(--tinta2);margin:0 0 16px">Necesitamos tus datos para confirmar la reserva y enviarte la confirmación por correo.</p>
+   <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 14px">
+     <div><label class="fl">Nombres</label>
+       <input class="in" id="dNom" value="${d.nombres}" placeholder="María"></div>
+     <div><label class="fl">Apellidos</label>
+       <input class="in" id="dApe" value="${d.apellidos}" placeholder="Pérez"></div>
+   </div>
+   <label class="fl">Correo electrónico</label>
+   <input class="in" id="dEmail" type="email" value="${d.email}" placeholder="tucorreo@gmail.com">
+   <div style="display:grid;grid-template-columns:120px 1fr;gap:0 14px">
+     <div><label class="fl">Documento</label>
+       <select class="in" id="dDocT">${docs.map(x=>`<option ${x===d.docTipo?"selected":""}>${x}</option>`).join("")}</select></div>
+     <div><label class="fl">Número</label>
+       <input class="in" id="dDocN" value="${d.docNumero}" placeholder="12345678"></div>
+   </div>
+   <label class="fl">Teléfono (opcional)</label>
+   <input class="in" id="dTel" value="${d.telefono}" placeholder="+51 999 999 999">
+   <div id="mD"></div>
+   <div class="modal-foot">
+     <button class="btn line" onclick="PASO=2;render()">Atrás</button>
+     <button class="btn oro" onclick="guardarDatos()">Continuar</button>
+   </div>`;
+}
+function guardarDatos(){
+  const d = S.sel.datos;
+  d.nombres=$("#dNom").value.trim(); d.apellidos=$("#dApe").value.trim();
+  d.email=$("#dEmail").value.trim(); d.docTipo=$("#dDocT").value;
+  d.docNumero=$("#dDocN").value.trim(); d.telefono=$("#dTel").value.trim();
+  const err=[];
+  if(d.nombres.length<2) err.push("Ingresa tus nombres.");
+  if(d.apellidos.length<2) err.push("Ingresa tus apellidos.");
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(d.email)) err.push("Ingresa un correo válido.");
+  if(d.docNumero.length<6) err.push("Ingresa un número de documento válido.");
+  if(d.telefono && !/^\+?[0-9 ]{6,20}$/.test(d.telefono)) err.push("El teléfono no es válido.");
+  if(err.length){ $("#mD").innerHTML=`<div class="msg err">${err[0]}</div>`; return; }
+  PASO=4; render();
+}
 function togTour(j,on){
   const t=JSON.parse(j), id=t.codigo||t.id;
   S.sel.tours = S.sel.tours.filter(x=>(x.codigo||x.id)!==id);
@@ -340,12 +418,15 @@ function paso3HTML(){
      ${lis.map(l=>`<div class="li"><span>${l[0]}</span><span>${l[1]}</span></div>`).join("")}
      <div class="li tot"><span>Total</span><b>${soles(c.total)}</b></div>
    </div>
+   <div class="li" style="margin:10px 0 0;color:var(--tinta2);font-size:.86rem">
+     A nombre de <b style="color:var(--tinta)">${S.sel.datos.nombres} ${S.sel.datos.apellidos}</b> · ${S.sel.datos.email}
+   </div>
    <label class="fl" style="margin-top:16px">Tarjeta (simulada para la demo)</label>
    <input class="in" id="fTar" value="4111 1111 1111 1111" maxlength="19">
    <label class="toggle"><input type="checkbox" id="fRechazo"> Simular pago rechazado (demo Saga)</label>
    <div id="m3"></div>
    <div class="modal-foot">
-     <button class="btn line" onclick="PASO=2;render()">Atrás</button>
+     <button class="btn line" onclick="PASO=3;render()">Atrás</button>
      <button class="btn oro" id="btnConf" onclick="confirmar()">Confirmar y pagar ${soles(c.total)}</button>
    </div>`;
 }
@@ -353,18 +434,25 @@ function paso3HTML(){
 async function confirmar(){
   const btn=$("#btnConf"), c=calcular();
   btn.disabled=true; btn.textContent="Procesando…";
+  $("#m3").innerHTML="";
   const rechazo = $("#fRechazo")?.checked;
-  const body = {
-    clienteId: CLIENTE_ID,
-    habitacionCodigo: S.sel.hab.codigo || S.sel.hab.id,
-    fechaInicio: S.sel.checkin, fechaFin: S.sel.checkout,
-    huespedes: S.sel.huespedes,
-    paqueteCodigo: S.sel.paquete ? (S.sel.paquete.codigo||S.sel.paquete.id) : null,
-    tours: S.sel.tours.map(t=>t.codigo||t.id),
-    pago: { metodo:"TARJETA", token: rechazo?"tok_rechazo":"tok_ok", monto:c.total }
-  };
   try{
-    await asegurarToken();
+    // 1) Identificar al cliente por su correo (registrar o recuperar su ficha).
+    if(!S.cliente || S.cliente.email!==S.sel.datos.email.trim().toLowerCase()){
+      S.cliente = await identificarCliente(S.sel.datos);
+    }
+    const clienteId = S.cliente.id;
+    // 2) Crear la reserva con los nombres de campo que espera el backend (snake_case).
+    const unTour = S.sel.tours[0];           // el backend acepta un tour por reserva
+    const body = {
+      cliente_id: clienteId,
+      habitacion_id: S.sel.hab.id || S.sel.hab.codigo,
+      desde: S.sel.checkin,
+      hasta: S.sel.checkout,
+      tour_id: unTour ? (unTour.codigo||unTour.id) : null,
+      paquete_id: S.sel.paquete ? (S.sel.paquete.codigo||S.sel.paquete.id) : null,
+      pago: { metodo:"TARJETA", token_tarjeta: rechazo?"tok_rechazo":"tok_ok_"+Date.now() }
+    };
     const r = await api("/api/v1/reservas", {
       method:"POST",
       headers:{ "Idempotency-Key": uuid() },
@@ -377,15 +465,32 @@ async function confirmar(){
         <h3>¡Reserva confirmada!</h3>
         <p style="color:var(--tinta2)">Tu código de reserva</p>
         <div class="code">${cod}</div>
-        <p class="hint">Hemos enviado la confirmación por correo. ¡Te esperamos en el JW Marriott Hotel Lima!</p>
+        <p class="hint">Enviamos la confirmación a <b>${S.sel.datos.email}</b>. ¡Te esperamos en el JW Marriott Hotel Lima!</p>
         <div style="margin-top:20px"><button class="btn" onclick="cerrarReserva()">Listo</button></div>
       </div>`;
     $("#modalTitle").textContent="Confirmación";
   }catch(e){
-    const msg = e.status===409 ? "El pago fue rechazado. La reserva se liberó automáticamente (compensación Saga)."
-             : e.status===422 ? "La habitación ya no está disponible para esas fechas."
-             : "No se pudo completar la reserva. Intenta nuevamente.";
-    $("#m3").innerHTML=`<div class="msg err">${msg}</div>`;
+    const cod = (e.data && e.data.error) || "";
+    const detalle = e.data && e.data.mensaje;     // mensaje real del backend
+    let msg;
+    // Pago rechazado (Saga): el backend lo marca con PAGO_RECHAZADO o similar.
+    if (/PAGO_RECHAZ|TARJETA_RECHAZ|SIN_FONDOS/i.test(cod))
+      msg = "El pago fue rechazado. La reserva se liberó automáticamente (compensación Saga).";
+    // Sin disponibilidad de la habitación en esas fechas.
+    else if (/SIN_DISPONIB|NO_DISPONIB|OCUPAD/i.test(cod))
+      msg = detalle || "La habitación ya no está disponible en esas fechas. Elige otras fechas u otra habitación.";
+    // Tour / paquete: no existe, inactivo, o fuera de la estadía.
+    else if (/TOUR|PAQUETE/i.test(cod))
+      msg = detalle || "El tour o paquete seleccionado no está disponible para esas fechas.";
+    // Cliente duplicado al identificar por correo.
+    else if (/CLIENTE_EXISTENTE|EMAIL_DUPLICAD|DOCUMENTO_DUPLICAD/i.test(cod))
+      msg = detalle || "Ya existe una cuenta con ese correo. Intenta de nuevo en un momento.";
+    // Cualquier otro error: mostrar el motivo real del backend si lo hay.
+    else
+      msg = detalle || "No se pudo completar la reserva. Intenta nuevamente.";
+    // Mostrar también el código técnico (ayuda a depurar) en pequeño.
+    const tecnico = cod ? ` <span style="opacity:.6;font-size:.8em">(${cod})</span>` : "";
+    $("#m3").innerHTML=`<div class="msg err">${msg}${tecnico}</div>`;
     btn.disabled=false; btn.textContent="Reintentar";
   }
 }
