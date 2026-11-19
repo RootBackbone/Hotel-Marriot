@@ -160,7 +160,8 @@ public class OrquestadorReservas {
             throw fallo;
         }
 
-        notificaciones.avisar(cliente.email(), "RESERVA_CONFIRMADA", datosAviso(r, cliente));
+        notificaciones.avisar(cliente.email(), "RESERVA_CONFIRMADA",
+                datosAviso(r, cliente, habitacion, paquete, tour));
         return r;
     }
 
@@ -270,29 +271,48 @@ public class OrquestadorReservas {
         }
     }
 
+    /** Datos para la cancelación (sin desglose de extras). */
     private static Map<String, String> datosAviso(Reserva r, Remotos.Cliente cliente) {
+        return datosAviso(r, cliente, null, null, null);
+    }
+
+    /** Datos para la confirmación: usa los nombres de habitación, paquete y tour. */
+    private static Map<String, String> datosAviso(Reserva r, Remotos.Cliente cliente,
+            Remotos.Habitacion habitacion, Remotos.Paquete paquete, Remotos.Tour tour) {
         Map<String, String> datos = new LinkedHashMap<>();
         datos.put("nombre", cliente.nombres());
         datos.put("reserva_id", r.getId());
-        datos.put("habitacion", r.getHabitacionId());
+        datos.put("habitacion", habitacion != null
+                ? nombreHabitacion(habitacion.tipo()) + " (" + habitacion.id() + ")"
+                : r.getHabitacionId());
         datos.put("desde", r.getDesde().toString());
         datos.put("hasta", r.getHasta().toString());
         datos.put("noches", String.valueOf(r.getNoches()));
         datos.put("moneda", r.getMoneda());
         datos.put("total", r.getTotal().toPlainString());
-        datos.put("desglose", filasDesglose(r));
+        datos.put("desglose", filasDesglose(paquete, tour));
         return datos;
     }
 
-
-    /** Filas HTML con los extras (paquete y tour) para el correo de confirmación. */
-    private static String filasDesglose(Reserva r) {
-        StringBuilder sb = new StringBuilder();
-        if (r.getPaqueteId() != null && !r.getPaqueteId().isBlank()) {
-            sb.append(filaExtra("Paquete", r.getPaqueteId()));
+    private static String nombreHabitacion(String tipo) {
+        if (tipo == null) return "Habitación";
+        switch (tipo.toUpperCase()) {
+            case "SIMPLE":        return "Habitación Deluxe";
+            case "DOBLE":         return "Habitación Doble Superior";
+            case "SUITE":         return "Suite Ejecutiva";
+            case "PRESIDENCIAL":  return "Suite Presidencial";
+            default:              return "Habitación " + tipo;
         }
-        if (r.getTourId() != null && !r.getTourId().isBlank()) {
-            sb.append(filaExtra("Tour", r.getTourId()));
+    }
+
+    /** Filas HTML con los extras (paquete y tour), usando sus nombres. */
+    private static String filasDesglose(Remotos.Paquete paquete, Remotos.Tour tour) {
+        StringBuilder sb = new StringBuilder();
+        if (paquete != null) {
+            sb.append(filaExtra("Paquete", paquete.nombre()));
+        }
+        if (tour != null) {
+            sb.append(filaExtra("Tour", tour.nombre()));
         }
         return sb.toString();
     }
