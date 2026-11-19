@@ -274,11 +274,34 @@ public class OrquestadorReservas {
         Map<String, String> datos = new LinkedHashMap<>();
         datos.put("nombre", cliente.nombres());
         datos.put("reserva_id", r.getId());
+        datos.put("habitacion", r.getHabitacionId());
         datos.put("desde", r.getDesde().toString());
         datos.put("hasta", r.getHasta().toString());
+        datos.put("noches", String.valueOf(r.getNoches()));
         datos.put("moneda", r.getMoneda());
         datos.put("total", r.getTotal().toPlainString());
+        datos.put("desglose", filasDesglose(r));
         return datos;
+    }
+
+
+    /** Filas HTML con los extras (paquete y tour) para el correo de confirmación. */
+    private static String filasDesglose(Reserva r) {
+        StringBuilder sb = new StringBuilder();
+        if (r.getPaqueteId() != null && !r.getPaqueteId().isBlank()) {
+            sb.append(filaExtra("Paquete", r.getPaqueteId()));
+        }
+        if (r.getTourId() != null && !r.getTourId().isBlank()) {
+            sb.append(filaExtra("Tour", r.getTourId()));
+        }
+        return sb.toString();
+    }
+
+    private static String filaExtra(String etiqueta, String valor) {
+        return "<tr><td style=\"padding:8px 0;border-top:1px solid #e6e9ee;color:#5c6472\">"
+                + etiqueta + "</td>"
+                + "<td align=\"right\" style=\"padding:8px 0;border-top:1px solid #e6e9ee\">"
+                + valor + "</td></tr>";
     }
 
     private static String truncar(String texto) {
