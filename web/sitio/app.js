@@ -453,7 +453,7 @@ async function confirmar(){
     const body = {
       clienteId, habitacionId: habId, desde:S.sel.checkin, hasta:S.sel.checkout,
       tourId, paqueteId: paqId,
-      pago: { metodo:"TARJETA", tokenTarjeta: token },
+      pago: { metodo:"TARJETA", tokenTarjeta: token, token_tarjeta: token },
       // compatibilidad snake_case (por si el gateway lo exigiera):
       cliente_id: clienteId, habitacion_id: habId,
       tour_id: tourId, paquete_id: paqId
