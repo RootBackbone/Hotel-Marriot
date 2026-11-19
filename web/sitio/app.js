@@ -442,23 +442,28 @@ async function confirmar(){
       S.cliente = await identificarCliente(S.sel.datos);
     }
     const clienteId = S.cliente.id;
-    // 2) Crear la reserva con los nombres de campo que espera el backend (snake_case).
+    // 2) Crear la reserva. El DTO del backend usa camelCase (habitacionId, clienteId,
+    //    tokenTarjeta). Enviamos camelCase y, por compatibilidad, también snake_case:
+    //    el backend ignora los campos que no reconoce.
     const unTour = S.sel.tours[0];           // el backend acepta un tour por reserva
+    const habId  = S.sel.hab.id || S.sel.hab.codigo;
+    const tourId = unTour ? (unTour.codigo||unTour.id) : null;
+    const paqId  = S.sel.paquete ? (S.sel.paquete.codigo||S.sel.paquete.id) : null;
+    const token  = rechazo ? "tok_rechazo" : "tok_ok_"+Date.now();
     const body = {
-      cliente_id: clienteId,
-      habitacion_id: S.sel.hab.id || S.sel.hab.codigo,
-      desde: S.sel.checkin,
-      hasta: S.sel.checkout,
-      tour_id: unTour ? (unTour.codigo||unTour.id) : null,
-      paquete_id: S.sel.paquete ? (S.sel.paquete.codigo||S.sel.paquete.id) : null,
-      pago: { metodo:"TARJETA", token_tarjeta: rechazo?"tok_rechazo":"tok_ok_"+Date.now() }
+      clienteId, habitacionId: habId, desde:S.sel.checkin, hasta:S.sel.checkout,
+      tourId, paqueteId: paqId,
+      pago: { metodo:"TARJETA", tokenTarjeta: token },
+      // compatibilidad snake_case (por si el gateway lo exigiera):
+      cliente_id: clienteId, habitacion_id: habId,
+      tour_id: tourId, paquete_id: paqId
     };
     const r = await api("/api/v1/reservas", {
       method:"POST",
       headers:{ "Idempotency-Key": uuid() },
       body: JSON.stringify(body)
     });
-    const cod = r.codigo || r.reservaId || r.id || "RES-"+Math.floor(Math.random()*9e5+1e5);
+    const cod = r.reserva_id || r.reservaId || r.codigo || r.id || "RES-"+Math.floor(Math.random()*9e5+1e5);
     $("#modalBody").innerHTML = `
       <div class="success">
         <div class="ic">✓</div>
