@@ -36,7 +36,7 @@ public class Notificacion {
     @Column(length = 200)
     private String asunto;
 
-    @Column(length = 2000)
+    @Column(columnDefinition = "text")
     private String mensaje;
 
     @Enumerated(EnumType.STRING)
