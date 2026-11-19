@@ -76,13 +76,18 @@ services:
       <<: *db
       DB_URL: jdbc:postgresql://postgres:5432/db_pagos
 
-  notificaciones:
+   notificaciones:
     <<: *servicio
     build: { context: ., dockerfile: docker/service.Dockerfile, args: { MODULE: services/notificaciones } }
     image: marriott/notificaciones:1.0.0
     environment:
       <<: *db
       DB_URL: jdbc:postgresql://postgres:5432/db_notificaciones
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      MAIL_FROM: ${MAIL_FROM:-JW Marriott Hotel Lima <soa.marriott.utp@gmail.com>}
 
   reservas:
     <<: *servicio

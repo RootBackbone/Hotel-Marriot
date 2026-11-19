@@ -21,6 +21,21 @@ spring:
     serialization:
       write-dates-as-timestamps: false
     time-zone: America/Lima
+  mail:
+    host: ${SMTP_HOST:}
+    port: ${SMTP_PORT:587}
+    username: ${SMTP_USER:}
+    password: ${SMTP_PASS:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+    test-connection: false
+
+notificaciones:
+  remitente: ${MAIL_FROM:JW Marriott Hotel Lima <no-reply@marioaponte.me>}
 
 management:
   endpoints:
