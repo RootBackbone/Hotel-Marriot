@@ -57,7 +57,7 @@ public class FiltroJwt implements GlobalFilter, Ordered {
                     "Falta el token o no es válido. Obténgalo en POST /api/v1/auth/token.");
         }
 
-        String rol = ReglasDeAcceso.rolRequerido(req.getMethod(), ruta);
+        String rol = ReglasDeAcceso.rolRequerido(req.getMethod(), ruta, req.getURI().getRawQuery());
         if (rol != null && !sesion.get().tiene(rol)) {
             return rechazar(exchange.getResponse(), HttpStatus.FORBIDDEN, "ACCESO_DENEGADO",
                     "Esta operación es solo para el rol " + rol + ".");
