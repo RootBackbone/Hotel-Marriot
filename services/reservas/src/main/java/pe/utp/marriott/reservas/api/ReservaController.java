@@ -33,6 +33,11 @@ public class ReservaController {
                                    @Valid @RequestBody CrearReservaRequest req) {
         return idempotentes.crear(clave, req);
     }
+	
+	 @GetMapping("/todas")
+    public List<ReservaResponse> listarTodas() {
+        return orquestador.listarTodas().stream().map(ReservaResponse::de).toList();
+    }
 
     @GetMapping("/{id}")
     public ReservaResponse obtener(@PathVariable String id) {

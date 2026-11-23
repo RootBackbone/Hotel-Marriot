@@ -172,6 +172,11 @@ public class OrquestadorReservas {
     public List<Reserva> listarPorCliente(String clienteId) {
         return reservas.findByClienteIdOrderByCreadoEnDesc(clienteId);
     }
+	/** Todas las reservas (para el panel de administración). */
+    public List<Reserva> listarTodas() {
+        return reservas.findAll();
+    }
+
 
     /**
      * Cancela una reserva confirmada: libera la habitación, devuelve el cupo del tour y reembolsa.

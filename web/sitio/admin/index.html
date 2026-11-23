@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Panel Admin — JW Marriott Hotel Lima</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Marcellus&family=Jost:wght@300;400;500;600&display=swap">
+<link rel="stylesheet" href="admin.css">
+<script src="chart.umd.min.js"></script>
+</head>
+<body>
+
+<!-- ============ LOGIN ============ -->
+<div id="loginView" class="login-wrap">
+  <div class="login-card">
+    <div class="brand"><b>JW&nbsp;Marriott</b><span>Hotel Lima</span></div>
+    <h2>Panel de administración</h2>
+    <div class="sub">Acceso exclusivo para personal del hotel</div>
+    <form id="loginForm" autocomplete="off">
+      <label class="fl">Usuario</label>
+      <input class="in" id="u" placeholder="recepcion" value="recepcion">
+      <label class="fl">Contraseña</label>
+      <input class="in" id="c" type="password" placeholder="••••••••">
+      <div id="loginMsg"></div>
+      <button class="btn oro block" id="btnLogin" type="submit">Ingresar</button>
+    </form>
+    <div class="hint">Demo: usuario <b>recepcion</b> · clave <b>recepcion123</b></div>
+  </div>
+</div>
+
+<!-- ============ APP ============ -->
+<div id="appView" class="app" hidden>
+  <aside class="side">
+    <div class="brand"><b>JW&nbsp;Marriott</b><span>Admin · Hotel Lima</span></div>
+    <nav class="nav">
+      <a data-v="dashboard" class="active"><span class="ic">▦</span> Dashboard</a>
+      <a data-v="habitaciones"><span class="ic">🛏</span> Habitaciones</a>
+      <a data-v="paquetes"><span class="ic">🎁</span> Paquetes</a>
+      <a data-v="tours"><span class="ic">🗺</span> Tours</a>
+      <a data-v="reservas"><span class="ic">📋</span> Reservas</a>
+      <a data-v="clientes"><span class="ic">👤</span> Clientes</a>
+    </nav>
+    <div class="foot">
+      <b id="quien">—</b>
+      <span>Rol: Administrador</span>
+      <button class="btn ghost sm block" id="btnSalir" style="margin-top:10px">Cerrar sesión</button>
+      <div style="margin-top:12px;font-size:.72rem"><a href="../index.html">← Volver al sitio</a></div>
+    </div>
+  </aside>
+  <main class="main" id="main"></main>
+</div>
+
+<script src="admin.js"></script>
+</body>
+</html>

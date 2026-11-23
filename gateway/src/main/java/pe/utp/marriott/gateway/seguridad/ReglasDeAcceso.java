@@ -42,6 +42,7 @@ public final class ReglasDeAcceso {
             regla(ESCRITURAS, "/api/v1/tours/**", ADMIN),
             // Listar todos los clientes es del personal; registrarse y ver una ficha, de cualquiera.
             // (La excepción de ?email= se maneja en rolRequerido, no aquí.)
+			regla(Set.of(HttpMethod.GET), "/api/v1/reservas/todas", ADMIN),
             regla(Set.of(HttpMethod.GET), "/api/v1/clientes", ADMIN),
             // Pagos y Notificaciones son utilidades internas: las usa Reservas por la red interna.
             regla(TODOS, "/api/v1/pagos/**", ADMIN),
