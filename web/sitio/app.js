@@ -128,6 +128,33 @@ function norm(res){
   const v = res.value;
   return Array.isArray(v) ? v : (v.disponibles || v.content || v.data || v.items || v.habitaciones || []);
 }
+function normV(v){ return Array.isArray(v)?v:((v&&(v.disponibles||v.content||v.data||v.items||v.habitaciones))||[]); }
+
+/* Buscar disponibilidad real para las fechas elegidas en el hero.
+   El backend: GET /habitaciones?desde&hasta devuelve SOLO las libres en ese rango. */
+let FILTRO_FECHAS=null;   // {desde,hasta} activo, o null = inventario completo
+async function buscarDisponibilidad(){
+  const din=$("#hIn")?.value, dout=$("#hOut")?.value;
+  S.sel.checkin = din||mas(7);
+  S.sel.checkout = dout||mas(9);
+  S.sel.huespedes=+($("#hHue")?.value||2);
+  if(noches(S.sel.checkin,S.sel.checkout)<1){
+    irA("habitaciones");
+    $("#roomsGrid").innerHTML=`<div class="skeleton">El check-out debe ser posterior al check-in.</div>`;
+    return;
+  }
+  irA("habitaciones");
+  const cont=$("#roomsGrid"); cont.innerHTML=`<div class="skeleton">Buscando disponibilidad para tus fechas…</div>`;
+  try{
+    await asegurarToken();
+    const q="?desde="+encodeURIComponent(S.sel.checkin)+"&hasta="+encodeURIComponent(S.sel.checkout);
+    S.habitaciones = normV(await api("/api/v1/habitaciones"+q));
+    FILTRO_FECHAS={desde:S.sel.checkin,hasta:S.sel.checkout};
+    pintarRooms();
+  }catch(e){
+    cont.innerHTML=`<div class="skeleton">No se pudo consultar la disponibilidad. (${e.status||"red"})</div>`;
+  }
+}
 function tipoDe(h){
   const t = (h.tipo || h.categoria || h.tipoHabitacion || h.nombre || "").toString().toUpperCase();
   if (t.includes("PRESIDEN")) return "PRESIDENCIAL";
@@ -153,14 +180,26 @@ function agruparPorTipo(){
   return ORDEN_TIPO.filter(t=>g[t]).map(t=>g[t]);
 }
 
+function bannerFechas(){
+  if(!FILTRO_FECHAS) return "";
+  return `<div class="filtro-fechas">
+    Mostrando disponibilidad del <b>${FILTRO_FECHAS.desde}</b> al <b>${FILTRO_FECHAS.hasta}</b>
+    · <button class="btn-link" onclick="verTodoElCatalogo()">Ver todas las habitaciones</button></div>`;
+}
+async function verTodoElCatalogo(){
+  FILTRO_FECHAS=null;
+  const cont=$("#roomsGrid"); cont.innerHTML=`<div class="skeleton">Cargando catálogo…</div>`;
+  try{ await asegurarToken(); S.habitaciones=normV(await api("/api/v1/habitaciones")); pintarRooms(); }
+  catch(e){ cont.innerHTML=`<div class="skeleton">No se pudo cargar. (${e.status||"red"})</div>`; }
+}
 function pintarRooms(){
   const cont = $("#roomsGrid");
   if (!S.habitaciones.length){
-    cont.innerHTML = `<div class="skeleton">No hay habitaciones disponibles por ahora.</div>`;
+    cont.innerHTML = bannerFechas()+`<div class="skeleton">${FILTRO_FECHAS?"No hay habitaciones libres para esas fechas. Prueba con otras fechas.":"No hay habitaciones disponibles por ahora."}</div>`;
     return;
   }
   const grupos = agruparPorTipo();
-  cont.innerHTML = grupos.map(g=>{
+  cont.innerHTML = bannerFechas() + grupos.map(g=>{
     const t = g.tipo;
     const hay = g.disp>0;
     const precio = isFinite(g.precio)?g.precio:0;
@@ -314,9 +353,18 @@ function irPaso2(){
   PASO=2; render();
 }
 
+function fechaTour(t){ return (t.fecha||t.fechaProgramada||"").toString().slice(0,10); }
+/* Un tour aplica si no tiene fecha, o si su fecha cae entre check-in y check-out. */
+function tourEnEstadia(t){
+  const f=fechaTour(t); if(!f) return true;
+  return f>=S.sel.checkin && f<=S.sel.checkout;
+}
 function paso2HTML(){
-  const paks = S.paquetes.slice(0,4);
-  const trs  = S.tours.slice(0,4);
+  const paks = S.paquetes.filter(p=>p.activo!==false).slice(0,6);
+  // separar tours: los que aplican a la estadía primero
+  const todosTours = S.tours.slice();
+  const trsOk = todosTours.filter(tourEnEstadia).slice(0,6);
+  const trsNo = todosTours.filter(t=>!tourEnEstadia(t)).slice(0,4);
   const pak = (p)=>{
     const id=p.codigo||p.id, pr=p.precio??p.costo??0, on=S.sel.paquete&&(S.sel.paquete.codigo||S.sel.paquete.id)===id;
     return `<label class="addon"><input type="radio" name="pak" ${on?"checked":""}
@@ -325,19 +373,25 @@ function paso2HTML(){
        <span class="pr">${soles(pr)}</span></label>`;
   };
   const tour=(t)=>{
-    const id=t.codigo||t.id, pr=t.precio??t.costo??0, on=S.sel.tours.some(x=>(x.codigo||x.id)===id);
+    const pr=t.precio??t.costo??0, on=S.sel.tours.some(x=>(x.codigo||x.id)===(t.codigo||t.id));
+    const f=fechaTour(t);
     return `<label class="addon"><input type="checkbox" ${on?"checked":""}
        onchange='togTour(${JSON.stringify(JSON.stringify(t))},this.checked)'>
-       <span class="info"><b>${t.nombre||"Tour"}</b><span>${t.descripcion||"Actividad opcional"}</span></span>
+       <span class="info"><b>${t.nombre||"Tour"}</b><span>${f?("Fecha: "+f):(t.descripcion||"Actividad opcional")}</span></span>
        <span class="pr">${soles(pr)}</span></label>`;
   };
+  const tourNo=(t)=>`<label class="addon" style="opacity:.5;cursor:not-allowed">
+       <input type="checkbox" disabled>
+       <span class="info"><b>${t.nombre||"Tour"}</b><span>No disponible para tus fechas (${fechaTour(t)})</span></span>
+       <span class="pr">${soles(t.precio??0)}</span></label>`;
   return `
    ${paks.length?`<label class="fl">Paquetes gastronómicos y experiencias</label>
      <div class="addons"><label class="addon"><input type="radio" name="pak" ${!S.sel.paquete?"checked":""}
         onchange="selPaquete(null)"><span class="info"><b>Sin paquete</b><span>Solo alojamiento</span></span>
         <span class="pr">S/ 0.00</span></label>${paks.map(pak).join("")}</div>`:""}
-   ${trs.length?`<label class="fl" style="margin-top:18px">Tours y actividades</label>
-     <div class="addons">${trs.map(tour).join("")}</div>`:""}
+   ${(trsOk.length||trsNo.length)?`<label class="fl" style="margin-top:18px">Tours y actividades
+     <span style="color:var(--tinta2);font-weight:400;text-transform:none;letter-spacing:0">· dentro de tu estadía (${S.sel.checkin} → ${S.sel.checkout})</span></label>
+     <div class="addons">${trsOk.length?trsOk.map(tour).join(""):`<div style="color:var(--tinta2);font-size:.86rem;padding:8px 0">No hay tours programados dentro de tus fechas.</div>`}${trsNo.map(tourNo).join("")}</div>`:""}
    ${(!paks.length&&!trs.length)?`<p style="color:var(--tinta2)">No hay experiencias adicionales disponibles. Puedes continuar con tu reserva.</p>`:""}
    <div class="modal-foot">
      <button class="btn line" onclick="PASO=1;render()">Atrás</button>
@@ -627,12 +681,7 @@ function init(){
   $("#burger")?.addEventListener("click",()=>$("#mobileMenu").classList.toggle("open"));
   observarSecciones();
   // buscador hero
-  $("#heroBuscar")?.addEventListener("click",()=>{
-    S.sel.checkin=$("#hIn")?.value||mas(7);
-    S.sel.checkout=$("#hOut")?.value||mas(9);
-    S.sel.huespedes=+($("#hHue")?.value||2);
-    irA("habitaciones");
-  });
+  $("#heroBuscar")?.addEventListener("click",()=>buscarDisponibilidad());
   // fechas por defecto en el buscador
   if($("#hIn")) $("#hIn").value=mas(7);
   if($("#hOut")) $("#hOut").value=mas(9);
@@ -662,4 +711,5 @@ if(document.readyState==="loading"){
 /* exponer funciones usadas en onclick inline */
 Object.assign(window,{ irA, abrirReserva, cerrarReserva, irPaso2, selPaquete, togTour,
   confirmar, abrirFoto, cerrarFoto, toggleChat, enviarChat,
-  verDetalle, cerrarDetalle, detPaso, reservarTipo });
+  verDetalle, cerrarDetalle, detPaso, reservarTipo,
+  buscarDisponibilidad, verTodoElCatalogo });
