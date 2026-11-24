@@ -117,3 +117,24 @@ tbody tr:hover{background:var(--panel2)}
 .loading{text-align:center;color:var(--tinta2);padding:50px}
 .view{animation:fade .25s ease}
 @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* ---------- FILTRO ESTILO SIEM ---------- */
+.filtro-siem{display:flex;align-items:center;gap:22px;flex-wrap:wrap;
+  background:var(--panel);border:1px solid var(--linea);border-radius:10px;
+  padding:14px 18px;margin-bottom:22px}
+.filtro-siem .chk{display:flex;align-items:center;gap:9px;font-size:.82rem;
+  color:var(--tinta);cursor:pointer;user-select:none;white-space:nowrap}
+.filtro-siem .chk input{width:17px;height:17px;accent-color:var(--oro);cursor:pointer}
+.filtro-siem .rango{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.filtro-siem .fl2{font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--oro)}
+.filtro-siem .atajos{display:flex;gap:6px;margin-left:auto;flex-wrap:wrap}
+.in.sm{width:auto;padding:7px 10px;font-size:.84rem}
+.in:disabled{opacity:.45;cursor:not-allowed}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+/* indicadores de estado en el topbar */
+.meta .live{color:var(--ok);font-weight:500;letter-spacing:.06em}
+.meta .live .dot{display:inline-block;width:8px;height:8px;border-radius:50%;
+  background:var(--ok);margin-right:6px;box-shadow:0 0 0 0 rgba(62,201,122,.6);
+  animation:pulse 1.6s infinite}
+.meta .paused{color:var(--warn);font-weight:500;letter-spacing:.06em}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(62,201,122,.6)}70%{box-shadow:0 0 0 7px rgba(62,201,122,0)}100%{box-shadow:0 0 0 0 rgba(62,201,122,0)}}

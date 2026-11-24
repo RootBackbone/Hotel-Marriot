@@ -5,6 +5,7 @@
 "use strict";
 const API = "";
 const S = { token:null, usuario:null, roles:[], vista:"dashboard", timer:null,
+            auto:true, rango:{desde:null,hasta:null}, charts:[],
             cache:{ habitaciones:[], paquetes:[], tours:[], reservas:[], clientes:[] } };
 
 const $=(s,c=document)=>c.querySelector(s);
@@ -94,13 +95,54 @@ function tipoHab(h){ return (h.tipo||h.categoria||"").toString().toUpperCase(); 
 function precioHab(h){ return h.tarifa_noche??h.tarifaNoche??h.precioNoche??h.precio??0; }
 
 async function verDashboard(){
+  // rango por defecto: últimos 14 días
+  if(!S.rango.desde){ const d=ultimosDias(14); S.rango.desde=d[0]; S.rango.hasta=d[d.length-1]; }
   try{ await cargarTodo(); }catch(e){ $("#main").innerHTML=err(e); return; }
   pintarDashboard();
-  // auto-refresco cada 20s
-  S.timer=setInterval(async()=>{ try{ await cargarTodo(); if(S.vista==="dashboard") pintarDashboard(); }catch{} },20000);
+  programarAuto();
 }
+function programarAuto(){
+  clearInterval(S.timer); S.timer=null;
+  if(S.auto){
+    S.timer=setInterval(async()=>{
+      if(S.vista!=="dashboard"){ return; }
+      // modo "live": el rango sigue a los últimos 14 días
+      const d=ultimosDias(14); S.rango.desde=d[0]; S.rango.hasta=d[d.length-1];
+      try{ await cargarTodo(); if(S.vista==="dashboard") pintarDashboard(); }catch{}
+    },20000);
+  }
+}
+/* --- controles del filtro (estilo SIEM) --- */
+function toggleAuto(on){
+  S.auto=on;
+  if(on){ const d=ultimosDias(14); S.rango.desde=d[0]; S.rango.hasta=d[d.length-1]; }
+  verDashboard(); // recarga + reprograma timer
+}
+function aplicarRango(){
+  const d=$("#fDesde").value, h=$("#fHasta").value;
+  if(!d||!h){ toast("Elige fecha inicio y fin",true); return; }
+  if(d>h){ toast("La fecha inicio no puede ser mayor que la fin",true); return; }
+  S.rango.desde=d; S.rango.hasta=h;
+  pintarDashboard();
+}
+function rangoRapido(n){
+  if(S.auto){ $("#chkAuto").checked=false; S.auto=false; clearInterval(S.timer); S.timer=null; }
+  const d=ultimosDias(n); S.rango.desde=d[0]; S.rango.hasta=d[d.length-1];
+  pintarDashboard();
+}
+/* genera el array de días YYYY-MM-DD entre desde y hasta (inclusive) */
+function diasRango(desde,hasta){
+  const a=[]; const d=new Date(desde+"T00:00:00"), f=new Date(hasta+"T00:00:00");
+  for(let x=new Date(d); x<=f; x.setDate(x.getDate()+1)) a.push(x.toISOString().slice(0,10));
+  return a.length?a:ultimosDias(14);
+}
+/* una reserva "cuenta" en el día de su creación (o, si no hay, el check-in) */
+function diaDe(r){ return fechaCreada(r) || (r.desde||"").slice(0,10); }
+
 function pintarDashboard(){
-  const H=S.cache.habitaciones, R=S.cache.reservas, C=S.cache.clientes;
+  const H=S.cache.habitaciones, Rall=S.cache.reservas, C=S.cache.clientes;
+  // filtrar reservas al rango activo
+  const R = S.reservasOk ? Rall.filter(r=>{ const dd=diaDe(r); return dd>=S.rango.desde && dd<=S.rango.hasta; }) : [];
   const dispo=H.filter(disp).length, mant=H.length-dispo;
   const confirmadas=R.filter(r=>/CONFIRM/i.test(r.estado||"")).length;
   const canceladas=R.filter(r=>/CANCEL/i.test(r.estado||"")).length;
@@ -108,14 +150,34 @@ function pintarDashboard(){
   const ocupacion = H.length? Math.round((mant/H.length)*100):0;
 
   const kReservas = S.reservasOk
-    ? `<div class="kpi"><div class="lbl">Reservas confirmadas</div><div class="val ok num">${confirmadas}</div><div class="sub">${canceladas} canceladas</div></div>
-       <div class="kpi"><div class="lbl">Ingresos confirmados</div><div class="val oro num">${soles(ingresos)}</div><div class="sub">de reservas confirmadas</div></div>`
+    ? `<div class="kpi"><div class="lbl">Reservas confirmadas</div><div class="val ok num">${confirmadas}</div><div class="sub">${canceladas} canceladas · en rango</div></div>
+       <div class="kpi"><div class="lbl">Ingresos confirmados</div><div class="val oro num">${soles(ingresos)}</div><div class="sub">confirmadas en rango</div></div>`
     : `<div class="kpi"><div class="lbl">Reservas</div><div class="val num">—</div><div class="sub">endpoint no disponible</div></div>
        <div class="kpi"><div class="lbl">Ingresos</div><div class="val num">—</div><div class="sub">requiere /reservas/todas</div></div>`;
 
+  const estadoLive = S.auto
+    ? `<span class="live"><span class="dot"></span> EN VIVO · cada 20 s</span>`
+    : `<span class="paused">⏸ PAUSADO · filtro manual</span>`;
+
   $("#main").innerHTML=`<div class="view">
     <div class="topbar"><h1>Dashboard</h1>
-      <div class="meta">Actualización automática cada 20 s · ${new Date().toLocaleTimeString("es-PE")}</div></div>
+      <div class="meta">${estadoLive} · ${new Date().toLocaleTimeString("es-PE")}</div></div>
+
+    <div class="filtro-siem">
+      <label class="chk"><input type="checkbox" id="chkAuto" ${S.auto?"checked":""}> Actualización automática (20&nbsp;s)</label>
+      <div class="rango">
+        <span class="fl2">Desde</span><input type="date" class="in sm" id="fDesde" value="${S.rango.desde}" ${S.auto?"disabled":""}>
+        <span class="fl2">Hasta</span><input type="date" class="in sm" id="fHasta" value="${S.rango.hasta}" ${S.auto?"disabled":""}>
+        <button class="btn sm oro" id="btnAplicar" ${S.auto?"disabled":""}>Aplicar</button>
+      </div>
+      <div class="atajos">
+        <button class="btn sm ghost" data-n="1">Hoy</button>
+        <button class="btn sm ghost" data-n="7">7 días</button>
+        <button class="btn sm ghost" data-n="14">14 días</button>
+        <button class="btn sm ghost" data-n="30">30 días</button>
+      </div>
+    </div>
+
     <div class="kpis">
       <div class="kpi"><div class="lbl">Habitaciones disponibles</div><div class="val ok num">${dispo}</div><div class="sub">de ${H.length} totales</div></div>
       <div class="kpi"><div class="lbl">En mantenimiento / ocupadas</div><div class="val navy num">${mant}</div><div class="sub">${ocupacion}% del total</div></div>
@@ -126,38 +188,56 @@ function pintarDashboard(){
     <div class="charts">
       <div class="card"><h3>Habitaciones por tipo</h3><div class="csub">Distribución del inventario</div>
         <div class="chart-box"><canvas id="chTipo"></canvas></div></div>
-      <div class="card"><h3>${S.reservasOk?"Reservas por día":"Estado de habitaciones"}</h3>
-        <div class="csub">${S.reservasOk?"Últimos 14 días":"Disponibles vs no disponibles"}</div>
-        <div class="chart-box"><canvas id="chTend"></canvas></div></div>
+      <div class="card"><h3>Reservas por día</h3>
+        <div class="csub">${S.reservasOk?rotuloRango():"Requiere /reservas/todas"}</div>
+        <div class="chart-box"><canvas id="chResLinea"></canvas></div></div>
     </div>
-    ${S.reservasOk?`<div class="charts"><div class="card" style="grid-column:1/-1"><h3>Ingresos por día</h3><div class="csub">Reservas confirmadas, últimos 14 días</div><div class="chart-box"><canvas id="chIng"></canvas></div></div></div>`:""}
+    ${S.reservasOk?`<div class="charts">
+      <div class="card"><h3>Reservas por día</h3><div class="csub">Conteo diario · ${rotuloRango()}</div><div class="chart-box"><canvas id="chResBar"></canvas></div></div>
+      <div class="card"><h3>Ingresos por día</h3><div class="csub">Reservas confirmadas · ${rotuloRango()}</div><div class="chart-box"><canvas id="chIng"></canvas></div></div>
+    </div>`:""}
   </div>`;
-  dibujarGraficos();
-}
 
-function dibujarGraficos(){
+  // listeners del filtro
+  $("#chkAuto")?.addEventListener("change",e=>toggleAuto(e.target.checked));
+  $("#btnAplicar")?.addEventListener("click",aplicarRango);
+  $$(".atajos button").forEach(b=>b.addEventListener("click",()=>rangoRapido(+b.dataset.n)));
+
+  dibujarGraficos(R);
+}
+function rotuloRango(){ return `${S.rango.desde} → ${S.rango.hasta}`; }
+
+function destruirGraficos(){ S.charts.forEach(c=>{try{c.destroy();}catch{}}); S.charts=[]; }
+
+function dibujarGraficos(R){
+  destruirGraficos();
   const col={oro:"#c9a35a",navy:"#3d6aa5",ok:"#3ec97a",err:"#e5737d",grid:"#2a3a4f",txt:"#93a1b5"};
   Chart.defaults.color=col.txt; Chart.defaults.borderColor=col.grid; Chart.defaults.font.family="Jost,sans-serif";
   // Habitaciones por tipo
   const tipos=["SIMPLE","DOBLE","SUITE","PRESIDENCIAL"];
   const porTipo=tipos.map(t=>S.cache.habitaciones.filter(h=>tipoHab(h)===t).length);
-  new Chart($("#chTipo"),{type:"doughnut",data:{labels:["Simple","Doble","Suite","Presidencial"],
+  S.charts.push(new Chart($("#chTipo"),{type:"doughnut",data:{labels:["Simple","Doble","Suite","Presidencial"],
     datasets:[{data:porTipo,backgroundColor:[col.navy,"#5a86bd",col.oro,col.err],borderWidth:0}]},
-    options:{plugins:{legend:{position:"bottom"}},cutout:"62%",maintainAspectRatio:false}});
+    options:{plugins:{legend:{position:"bottom"}},cutout:"62%",maintainAspectRatio:false}}));
 
   if(S.reservasOk){
-    const dias=ultimosDias(14);
-    const porDia=dias.map(d=>S.cache.reservas.filter(r=>(r.desde||"").slice(0,10)===d || fechaCreada(r)===d).length);
-    const ingDia=dias.map(d=>S.cache.reservas.filter(r=>/CONFIRM/i.test(r.estado||"")&&(fechaCreada(r)===d||(r.desde||"").slice(0,10)===d)).reduce((a,r)=>a+Number(r.total||0),0));
+    const dias=diasRango(S.rango.desde,S.rango.hasta);
+    const porDia=dias.map(d=>R.filter(r=>diaDe(r)===d).length);
+    const ingDia=dias.map(d=>R.filter(r=>/CONFIRM/i.test(r.estado||"")&&diaDe(r)===d).reduce((a,r)=>a+Number(r.total||0),0));
     const lab=dias.map(d=>d.slice(5));
-    new Chart($("#chTend"),{type:"line",data:{labels:lab,datasets:[{label:"Reservas",data:porDia,borderColor:col.oro,backgroundColor:"rgba(201,163,90,.15)",fill:true,tension:.3}]},
-      options:{plugins:{legend:{display:false}},maintainAspectRatio:false,scales:{y:{beginAtZero:true,ticks:{precision:0}}}}});
-    new Chart($("#chIng"),{type:"bar",data:{labels:lab,datasets:[{label:"Ingresos",data:ingDia,backgroundColor:col.navy}]},
-      options:{plugins:{legend:{display:false}},maintainAspectRatio:false,scales:{y:{beginAtZero:true}}}});
+    // Reservas por día — línea (tendencia)
+    S.charts.push(new Chart($("#chResLinea"),{type:"line",data:{labels:lab,datasets:[{label:"Reservas",data:porDia,borderColor:col.oro,backgroundColor:"rgba(201,163,90,.15)",fill:true,tension:.3}]},
+      options:{plugins:{legend:{display:false}},maintainAspectRatio:false,scales:{y:{beginAtZero:true,ticks:{precision:0}}}}}));
+    // Reservas por día — barras (conteo)
+    S.charts.push(new Chart($("#chResBar"),{type:"bar",data:{labels:lab,datasets:[{label:"Reservas",data:porDia,backgroundColor:col.oro}]},
+      options:{plugins:{legend:{display:false}},maintainAspectRatio:false,scales:{y:{beginAtZero:true,ticks:{precision:0}}}}}));
+    // Ingresos por día — barras
+    S.charts.push(new Chart($("#chIng"),{type:"bar",data:{labels:lab,datasets:[{label:"Ingresos",data:ingDia,backgroundColor:col.navy}]},
+      options:{plugins:{legend:{display:false}},maintainAspectRatio:false,scales:{y:{beginAtZero:true}}}}));
   }else{
     const dispo=S.cache.habitaciones.filter(disp).length, mant=S.cache.habitaciones.length-dispo;
-    new Chart($("#chTend"),{type:"bar",data:{labels:["Disponibles","No disponibles"],datasets:[{data:[dispo,mant],backgroundColor:[col.ok,col.err]}]},
-      options:{plugins:{legend:{display:false}},maintainAspectRatio:false,scales:{y:{beginAtZero:true,ticks:{precision:0}}}}});
+    S.charts.push(new Chart($("#chResLinea"),{type:"bar",data:{labels:["Disponibles","No disponibles"],datasets:[{data:[dispo,mant],backgroundColor:[col.ok,col.err]}]},
+      options:{plugins:{legend:{display:false}},maintainAspectRatio:false,scales:{y:{beginAtZero:true,ticks:{precision:0}}}}}));
   }
 }
 function ultimosDias(n){ const a=[]; for(let i=n-1;i>=0;i--){ const d=new Date(); d.setDate(d.getDate()-i); a.push(d.toISOString().slice(0,10)); } return a; }
@@ -393,4 +473,5 @@ window.addEventListener("DOMContentLoaded",()=>{
   document.addEventListener("keydown",e=>{ if(e.key==="Escape") cerrarModal(); });
 });
 Object.assign(window,{ irA, modalHabitacion, guardarHabitacion, modalPaquete, guardarPaquete, eliminarPaquete,
-  modalTour, guardarTour, eliminarTour, cancelarReserva, modalCliente, guardarCliente, cerrarModal });
+  modalTour, guardarTour, eliminarTour, cancelarReserva, modalCliente, guardarCliente, cerrarModal,
+  toggleAuto, aplicarRango, rangoRapido });
