@@ -88,6 +88,9 @@ async function cargarTodo(){
   catch{ S.reservasOk=false; }
   // Clientes
   try{ const cl=await api("/api/v1/clientes"); S.cache.clientes=arr(cl); }catch{ S.cache.clientes=[]; }
+  // Salud de los microservicios (agregador del gateway)
+  try{ S.cache.salud=await api("/api/v1/salud"); S.saludOk=true; }
+  catch{ S.saludOk=false; S.cache.salud=null; }
 }
 
 function disp(h){ return !(h.disponible===false||/MANTEN|OCUP/i.test(h.estado||"")); }
@@ -178,6 +181,8 @@ function pintarDashboard(){
       </div>
     </div>
 
+    ${bloqueSalud()}
+
     <div class="kpis">
       <div class="kpi"><div class="lbl">Habitaciones disponibles</div><div class="val ok num">${dispo}</div><div class="sub">de ${H.length} totales</div></div>
       <div class="kpi"><div class="lbl">En mantenimiento / ocupadas</div><div class="val navy num">${mant}</div><div class="sub">${ocupacion}% del total</div></div>
@@ -206,6 +211,35 @@ function pintarDashboard(){
   dibujarGraficos(R);
 }
 function rotuloRango(){ return `${S.rango.desde} → ${S.rango.hasta}`; }
+
+/* --- tarjeta de disponibilidad de servicios (estilo SIEM) --- */
+function bloqueSalud(){
+  if(!S.saludOk || !S.cache.salud){
+    return `<div class="salud card">
+      <div class="salud-h"><h3>Estado de los servicios</h3>
+        <span class="salud-sum down">SIN DATOS</span></div>
+      <div class="csub">No se pudo consultar <b>/api/v1/salud</b> (requiere el agregador en el gateway).</div></div>`;
+  }
+  const d=S.cache.salud;
+  const nodos=[d.gateway, ...(d.servicios||[])].filter(Boolean);
+  const sumCls = d.resumen==="OPERATIVO"?"ok":(d.resumen==="CAIDO"?"down":"warn");
+  const chips=nodos.map(n=>{
+    const up=n.estado==="UP";
+    return `<div class="svc ${up?"up":"down"}">
+      <span class="svc-dot"></span>
+      <div class="svc-info"><b>${esc(n.nombre)}</b>
+        <span>${up?`${n.latencia_ms} ms`:"sin respuesta"}</span></div>
+    </div>`;
+  }).join("");
+  return `<div class="salud card">
+    <div class="salud-h">
+      <h3>Estado de los servicios</h3>
+      <span class="salud-sum ${sumCls}">${esc(d.resumen)} · ${d.arriba}/${d.total}</span>
+    </div>
+    <div class="csub">Microservicios del SOA · consulta al gateway en vivo</div>
+    <div class="svc-grid">${chips}</div>
+  </div>`;
+}
 
 function destruirGraficos(){ S.charts.forEach(c=>{try{c.destroy();}catch{}}); S.charts=[]; }
 
