@@ -157,3 +157,7 @@ tbody tr:hover{background:var(--panel2)}
 .svc-info b{font-size:.86rem;color:var(--tinta);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .svc-info span{font-size:.72rem;color:var(--tinta2)}
 .svc.down .svc-info span{color:var(--err)}
+
+/* selector de criterio (por reserva / por estadía) */
+.filtro-siem .criterio{display:flex;align-items:center;gap:8px}
+.filtro-siem .criterio select{cursor:pointer}

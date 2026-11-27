@@ -5,7 +5,7 @@
 "use strict";
 const API = "";
 const S = { token:null, usuario:null, roles:[], vista:"dashboard", timer:null,
-            auto:true, rango:{desde:null,hasta:null}, charts:[],
+            auto:true, rango:{desde:null,hasta:null}, criterio:"creacion", charts:[],
             cache:{ habitaciones:[], paquetes:[], tours:[], reservas:[], clientes:[] } };
 
 const $=(s,c=document)=>c.querySelector(s);
@@ -139,8 +139,13 @@ function diasRango(desde,hasta){
   for(let x=new Date(d); x<=f; x.setDate(x.getDate()+1)) a.push(x.toISOString().slice(0,10));
   return a.length?a:ultimosDias(14);
 }
-/* una reserva "cuenta" en el día de su creación (o, si no hay, el check-in) */
-function diaDe(r){ return fechaCreada(r) || (r.desde||"").slice(0,10); }
+/* Una reserva "cuenta" según el criterio elegido:
+   - creacion: por su fecha de registro (cuándo se hizo la reserva) — métrica de negocio.
+   - estadia:  por su fecha de check-in (cuándo llega el huésped) — métrica de operación. */
+function diaDe(r){
+  if(S.criterio==="estadia"){ return (r.desde||"").slice(0,10) || fechaCreada(r); }
+  return fechaCreada(r) || (r.desde||"").slice(0,10);
+}
 
 function pintarDashboard(){
   const H=S.cache.habitaciones, Rall=S.cache.reservas, C=S.cache.clientes;
@@ -172,6 +177,13 @@ function pintarDashboard(){
         <span class="fl2">Desde</span><input type="date" class="in sm" id="fDesde" value="${S.rango.desde}" ${S.auto?"disabled":""}>
         <span class="fl2">Hasta</span><input type="date" class="in sm" id="fHasta" value="${S.rango.hasta}" ${S.auto?"disabled":""}>
         <button class="btn sm oro" id="btnAplicar" ${S.auto?"disabled":""}>Aplicar</button>
+      </div>
+      <div class="criterio">
+        <span class="fl2">Medir por</span>
+        <select class="in sm" id="selCriterio">
+          <option value="creacion" ${S.criterio==="creacion"?"selected":""}>Fecha de reserva</option>
+          <option value="estadia" ${S.criterio==="estadia"?"selected":""}>Fecha de estadía</option>
+        </select>
       </div>
       <div class="atajos">
         <button class="btn sm ghost" data-n="1">Hoy</button>
@@ -207,10 +219,14 @@ function pintarDashboard(){
   $("#chkAuto")?.addEventListener("change",e=>toggleAuto(e.target.checked));
   $("#btnAplicar")?.addEventListener("click",aplicarRango);
   $$(".atajos button").forEach(b=>b.addEventListener("click",()=>rangoRapido(+b.dataset.n)));
+  $("#selCriterio")?.addEventListener("change",e=>{ S.criterio=e.target.value; pintarDashboard(); });
 
   dibujarGraficos(R);
 }
-function rotuloRango(){ return `${S.rango.desde} → ${S.rango.hasta}`; }
+function rotuloRango(){
+  const crit = S.criterio==="estadia" ? "por estadía" : "por reserva";
+  return `${S.rango.desde} → ${S.rango.hasta} · ${crit}`;
+}
 
 /* --- tarjeta de disponibilidad de servicios (estilo SIEM) --- */
 function bloqueSalud(){
